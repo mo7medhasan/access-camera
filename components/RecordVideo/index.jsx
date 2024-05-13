@@ -151,7 +151,7 @@ export default function RecordVideo() {
       (device) => device.deviceId !== activeDeviceId
     )?.deviceId;
     if (nextDeviceId) {
-      setActiveDeviceId(nextDeviceId);
+      setActiveDeviceId(devices[devices.length-1].deviceId);
     } else {
       // If no other device found, cycle back to the first one
       setActiveDeviceId(devices[0].deviceId);
@@ -172,8 +172,8 @@ export default function RecordVideo() {
           <Webcam
             height={1000}
             width={1000}
-            audio={false}
-            mirrored={true}
+            audio={true}
+            mirrored={false}
             ref={webcamRef}
             videoConstraints={{ deviceId: activeDeviceId }}
           />
