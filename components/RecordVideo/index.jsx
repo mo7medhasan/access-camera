@@ -35,19 +35,12 @@ export default function RecordVideo() {
   );
  
   React.useEffect(() => {
-    // getCameraPermission();
-    navigator.mediaDevices.enumerateDevices()
-      .then(res=>{  
-        handleDevices(res)
-      }) // Chain .then() to the Promise
-      .catch(error => console.error("Error enumerating devices:", error)); // Handle errors
+    navigator.mediaDevices.enumerateDevices().then(handleDevices);
+    navigator.getUserMedia({audio:true,video:true}, function(stream) {
+            stream.getTracks().forEach(x=> x.stats());
+          }, err=>console.log(err))
   }, [handleDevices]);
-  React.useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(handleDevices)
-
-  .catch(error => console.error("Error enumerating devices:", error)); // Handle errors
-;
-  }, [handleDevices]);
+  
 
   React.useEffect(() => {
     if (devices.length) setActiveDeviceId(devices[0].deviceId);
@@ -225,7 +218,7 @@ export default function RecordVideo() {
           ) : null}
         </div>
       </div>
-      <div className=" flex justify-between gap-10">
+      <div className=" flex justify-between flex-wrap gap-10">
         {recording || pause ? (
           <>
             <button
