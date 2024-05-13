@@ -20,30 +20,30 @@ export default function RecordVideo() {
   const [recording, setRecording] = useState(false);
   const [isRunning, setRunning] = useState(false);
   const [pause, setPause] = useState(false);
-  //   const getCameraPermission = async () => {
-
-  //     navigator.getUserMedia({audio:true,video:true}, function(stream) {
-  //       stream.getTracks().forEach(x=> x.stats());
-  //     }, err=>console.log(err));
-  // };
+  
 
   const handleDevices = React.useCallback(
-    (mediaDevices) =>
-      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput")),
-
-    [setDevices]
+    (mediaDevices) =>{
+      console.log("mediaDevice",mediaDevices)
+      setDevices(prev=>[prev,mediaDevices])
+      // mediaDevices.map(( mediaDevice ) =>console.log("mediaDevice",mediaDevice,mediaDevice?.kind))
+    }
+    ,[setDevices]
   );
  
   React.useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(handleDevices);
-    navigator.getUserMedia({audio:true,video:true}, function(stream) {
-            stream.getTracks().forEach(x=> x.stats());
-          }, err=>console.log(err))
+    // navigator.mediaDevices.enumerateDevices().then(handleDevices);
+    const constraints = { video: { facingMode: "environment" } }; // Request rear camera
+navigator.mediaDevices.getUserMedia(constraints)
+  .then(handleDevices)
+  .catch(err => {
+    console.error(err);
+  });
   }, [handleDevices]);
   
 
   React.useEffect(() => {
-    if (devices.length) setActiveDeviceId(devices[devices.length-2].deviceId);
+    if (devices.length) setActiveDeviceId(devices[0].id);
   }, [devices]);
   const handleDataAvailable = useCallback(
     ({ data }) => {
@@ -60,7 +60,6 @@ export default function RecordVideo() {
   }, [webcamRef]);
   const handleStartCaptureClick = useCallback(() => {
     setRecording(true);
-    // handleRightButtonPress();
     const interval = setInterval(() => {
       setTime((previousTime) => previousTime + 1);
     }, 1000);
@@ -79,16 +78,9 @@ export default function RecordVideo() {
       setPause(true);
       clearInterval(timer.current);
       timer.current = null;
-      // handleRightButtonPress();
+      
     }
-  }, [
-    webcamRef,
-    recording,
-    pause,
-    setRecording,
-    mediaRecorderRef,
-    handleDataAvailable,
-  ]);
+  }, [recording, setRecording, mediaRecorderRef]);
   const handlePlayAgainRecording = useCallback(() => {
     if (recording && !pause) return;
     setRecording(true);
@@ -148,17 +140,24 @@ export default function RecordVideo() {
       alert("No cameras available");
       return;
     }
-
-    const nextDeviceId = devices.find(
-      (device) => device.deviceId !== activeDeviceId
-    )?.deviceId;
-    if (nextDeviceId) {
-      setActiveDeviceId(nextDeviceId);
+  
+    // const hasRearCamera = devices.some(device => device.kind === 'videoinput' && device.label.includes('back'));
+  
+    if (!hasRearCamera) {
+      alert("Rear camera not available on this device");
+      return;
+    }
+  
+    // const rearCamera = devices.find(device => device.kind === 'videoinput' && device.label.includes('back'));
+  
+    if (rearCamera) {
+      // setActiveDeviceId(rearCamera.deviceId);
     } else {
-      // If no other device found, cycle back to the first one
-      setActiveDeviceId(devices[0].deviceId);
+      // If no rear camera found, try the front camera
+      setActiveDeviceId(devices[0].id);
     }
   };
+  
 
   useEffect(() => {
     if (isRunning && time > 60 * 3) {
@@ -177,7 +176,7 @@ export default function RecordVideo() {
             audio={true}
             mirrored={true}
             ref={webcamRef}
-            videoConstraints={{ deviceId: activeDeviceId }}
+            videoConstraints={{  deviceId: activeDeviceId }}
           />:activeDeviceId}
           {time ? (
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2  p-5 flex justify-center items-center  bg-gray-950 text-red-500 rounded-full ">
@@ -285,8 +284,8 @@ export default function RecordVideo() {
         </button> */}
       </div>
     <div className="flex flex-col justify-center gap-5">  {devices.map((device,indx) =>
-      <button onClick={()=>setActiveDeviceId(device.deviceId)} key={indx+device.deviceId} className="text-red-500 text-center w-full">
-{device.deviceId}
+      <button onClick={()=>setActiveDeviceId(device.id)} key={indx+device.id} className="text-red-500 text-center w-full">
+{device.id}
       </button>
       )}</div>
     </div>
