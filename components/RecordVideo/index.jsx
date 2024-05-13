@@ -147,11 +147,11 @@ export default function RecordVideo() {
       return;
     }
 
-    const nextDeviceId = devices.find(
+    const nextDeviceId = devices.lastIndexOf(
       (device) => device.deviceId !== activeDeviceId
     )?.deviceId;
     if (nextDeviceId) {
-      setActiveDeviceId(devices[devices.length-1].deviceId);
+      setActiveDeviceId(devices[nextDeviceId].deviceId);
     } else {
       // If no other device found, cycle back to the first one
       setActiveDeviceId(devices[0].deviceId);
