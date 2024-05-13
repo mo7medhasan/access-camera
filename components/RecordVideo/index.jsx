@@ -43,7 +43,7 @@ export default function RecordVideo() {
   
 
   React.useEffect(() => {
-    if (devices.length) setActiveDeviceId(devices[0].deviceId);
+    if (devices.length) setActiveDeviceId(devices[devices.length-2].deviceId);
   }, [devices]);
   const handleDataAvailable = useCallback(
     ({ data }) => {
