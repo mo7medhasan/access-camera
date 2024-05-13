@@ -130,8 +130,8 @@ export default function RecordVideo() {
 
   const handleDownload = useCallback(() => {
     if (recordedChunks.length) {
-      const blob = new Blob(recordedChunks, { type: "video/webm" });
-      const url = window.URL.createObjectURL(blob);
+      // const blob = new Blob(recordedChunks, { type: "video/webm" });
+      // const url = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       document.body.appendChild(a);
