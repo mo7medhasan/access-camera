@@ -20,30 +20,28 @@ export default function RecordVideo() {
   const [recording, setRecording] = useState(false);
   const [isRunning, setRunning] = useState(false);
   const [pause, setPause] = useState(false);
-  
+  //   const getCameraPermission = async () => {
+
+  //     navigator.getUserMedia({audio:true,video:true}, function(stream) {
+  //       stream.getTracks().forEach(x=> x.stats());
+  //     }, err=>console.log(err));
+  // };
 
   const handleDevices = React.useCallback(
-    (mediaDevices) =>{
-      console.log("mediaDevice",mediaDevices)
-      setDevices(prev=>[prev,mediaDevices])
-      // mediaDevices.map(( mediaDevice ) =>console.log("mediaDevice",mediaDevice,mediaDevice?.kind))
-    }
-    ,[setDevices]
+    (mediaDevices) =>
+      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput")),
+
+    [setDevices]
   );
  
   React.useEffect(() => {
-    // navigator.mediaDevices.enumerateDevices().then(handleDevices);
-    const constraints = { video: { facingMode: "environment" } }; // Request rear camera
-navigator.mediaDevices.getUserMedia(constraints)
-  .then(handleDevices)
-  .catch(err => {
-    console.error(err);
-  });
+    navigator.mediaDevices.enumerateDevices().then(handleDevices);
+
   }, [handleDevices]);
   
 
   React.useEffect(() => {
-    if (devices.length) setActiveDeviceId(devices[0].id);
+    if (devices.length) setActiveDeviceId(devices[0].deviceId);
   }, [devices]);
   const handleDataAvailable = useCallback(
     ({ data }) => {
@@ -60,6 +58,7 @@ navigator.mediaDevices.getUserMedia(constraints)
   }, [webcamRef]);
   const handleStartCaptureClick = useCallback(() => {
     setRecording(true);
+    // handleRightButtonPress();
     const interval = setInterval(() => {
       setTime((previousTime) => previousTime + 1);
     }, 1000);
@@ -78,9 +77,16 @@ navigator.mediaDevices.getUserMedia(constraints)
       setPause(true);
       clearInterval(timer.current);
       timer.current = null;
-      
+      // handleRightButtonPress();
     }
-  }, [recording, setRecording, mediaRecorderRef]);
+  }, [
+    webcamRef,
+    recording,
+    pause,
+    setRecording,
+    mediaRecorderRef,
+    handleDataAvailable,
+  ]);
   const handlePlayAgainRecording = useCallback(() => {
     if (recording && !pause) return;
     setRecording(true);
@@ -140,24 +146,17 @@ navigator.mediaDevices.getUserMedia(constraints)
       alert("No cameras available");
       return;
     }
-  
-    // const hasRearCamera = devices.some(device => device.kind === 'videoinput' && device.label.includes('back'));
-  
-    if (!hasRearCamera) {
-      alert("Rear camera not available on this device");
-      return;
-    }
-  
-    // const rearCamera = devices.find(device => device.kind === 'videoinput' && device.label.includes('back'));
-  
-    if (rearCamera) {
-      // setActiveDeviceId(rearCamera.deviceId);
+
+    const nextDeviceId = devices.find(
+      (device) => device.deviceId !== activeDeviceId
+    )?.deviceId;
+    if (nextDeviceId) {
+      setActiveDeviceId(nextDeviceId);
     } else {
-      // If no rear camera found, try the front camera
-      setActiveDeviceId(devices[0].id);
+      // If no other device found, cycle back to the first one
+      setActiveDeviceId(devices[0].deviceId);
     }
   };
-  
 
   useEffect(() => {
     if (isRunning && time > 60 * 3) {
@@ -170,14 +169,14 @@ navigator.mediaDevices.getUserMedia(constraints)
       <div className="flex justify-between flex-wrap">
         <div className="relative md:w-[70%] w-full">
           {" "}
-         {activeDeviceId? <Webcam
+          <Webcam
             height={1000}
             width={1000}
-            audio={true}
+            audio={false}
             mirrored={true}
             ref={webcamRef}
-            videoConstraints={{  deviceId: activeDeviceId }}
-          />:activeDeviceId}
+            videoConstraints={{ deviceId: activeDeviceId }}
+          />
           {time ? (
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2  p-5 flex justify-center items-center  bg-gray-950 text-red-500 rounded-full ">
               {displayTime(time)}
@@ -284,8 +283,8 @@ navigator.mediaDevices.getUserMedia(constraints)
         </button> */}
       </div>
     <div className="flex flex-col justify-center gap-5">  {devices.map((device,indx) =>
-      <button onClick={()=>setActiveDeviceId(device.id)} key={indx+device.id} className="text-red-500 text-center w-full">
-{device.id}
+      <button onClick={()=>setActiveDeviceId(device.deviceId)} key={indx+device.deviceId} className="text-red-500 text-center w-full">
+{device.label}
       </button>
       )}</div>
     </div>
