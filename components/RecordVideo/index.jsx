@@ -168,8 +168,8 @@ export default function RecordVideo() {
 
   return (
     <div className="gap-10 flex flex-col justify-center">
-      <div className="flex justify-between">
-        <div className="relative w-[70%] ">
+      <div className="flex justify-between flex-wrap">
+        <div className="relative md:w-[70%] w-full">
           {" "}
           <Webcam
             height={1000}
