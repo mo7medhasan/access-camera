@@ -130,22 +130,22 @@ export default function RecordVideo() {
 
   const handleDownload = useCallback(() => {
     if (recordedChunks.length) {
-      // const blob = new Blob(recordedChunks, { type: "video/webm" });
-      // const url = window.URL.createObjectURL(blob);
+      const blob = new Blob(recordedChunks, { type: "video" });
+      const urlDownload = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       document.body.appendChild(a);
       a.style = "display:none";
-      a.href = url;
-      a.download = "react-webcam-stream-capture.webm";
+      a.href = urlDownload;
+      a.download = "react-webcam-stream-capture.mp4";
       a.click();
-      window.URL.revokeObjectURL(url);
+      URL.revokeObjectURL(urlDownload);
     }
   }, [recordedChunks]);
 
   const switchCamera = async () => {
     if (!devices.length) {
-      console.warn("No cameras available");
+      alert("No cameras available");
       return;
     }
 
@@ -284,6 +284,11 @@ export default function RecordVideo() {
         get Camera Permission 
         </button> */}
       </div>
+    <div className="flex flex-col justify-center gap-5">  {devices.map((device,indx) =>
+      <button onClick={()=>setActiveDeviceId(device.deviceId)} key={indx+device.deviceId} className="text-red-500 text-center w-full">
+{device.deviceId}
+      </button>
+      )}</div>
     </div>
   );
 }
