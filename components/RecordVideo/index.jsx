@@ -42,7 +42,12 @@ export default function RecordVideo() {
       }) // Chain .then() to the Promise
       .catch(error => console.error("Error enumerating devices:", error)); // Handle errors
   }, [handleDevices]);
-  
+  React.useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(handleDevices)
+
+  .catch(error => console.error("Error enumerating devices:", error)); // Handle errors
+;
+  }, [handleDevices]);
 
   React.useEffect(() => {
     if (devices.length) setActiveDeviceId(devices[0].deviceId);
