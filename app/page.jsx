@@ -1,11 +1,13 @@
 
 import React from 'react'
-import dynamic from 'next/dynamic';
+
+import Link from 'next/link';
 export default function page() {
-    const VideoRecordingDialog = dynamic(() => import('@/components/RecordVideo'), { ssr: false });
   return (
     <div>
-      <VideoRecordingDialog />
+    <Link href={"/camera"} className='text-6xl '>
+    camera
+    </Link>
     </div>
   )
 }
