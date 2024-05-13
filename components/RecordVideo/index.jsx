@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import RecordRTC from "recordrtc";
-import CustomVideoPlayer from "../VideoComponents";
 import VideoPlayer from "../VideoComponents/VideoPlayer";
 import { displayTime } from "../VideoComponents/util/CustomFormat";
 
@@ -15,30 +14,23 @@ export default function RecordVideo() {
   const [activeDeviceId, setActiveDeviceId] = React.useState();
   const [urls, setUrls] = React.useState([]);
   const [url, setUrl] = React.useState();
-  const [time, setTime] = useState(0); 
-   const [endTime, setEndTime] = useState(0);
+  const [time, setTime] = useState(0);
+  const [endTime, setEndTime] = useState(0);
   const [recording, setRecording] = useState(false);
   const [isRunning, setRunning] = useState(false);
   const [pause, setPause] = useState(false);
-  //   const getCameraPermission = async () => {
-
-  //     navigator.getUserMedia({audio:true,video:true}, function(stream) {
-  //       stream.getTracks().forEach(x=> x.stats());
-  //     }, err=>console.log(err));
-  // };
 
   const handleDevices = React.useCallback(
-    (mediaDevices) =>
-      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput")),
+    (mediaDevices) => {
+      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
+    },
 
     [setDevices]
   );
- 
+
   React.useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
-
   }, [handleDevices]);
-  
 
   React.useEffect(() => {
     if (devices.length) setActiveDeviceId(devices[0].deviceId);
@@ -58,7 +50,6 @@ export default function RecordVideo() {
   }, [webcamRef]);
   const handleStartCaptureClick = useCallback(() => {
     setRecording(true);
-    // handleRightButtonPress();
     const interval = setInterval(() => {
       setTime((previousTime) => previousTime + 1);
     }, 1000);
@@ -77,35 +68,20 @@ export default function RecordVideo() {
       setPause(true);
       clearInterval(timer.current);
       timer.current = null;
-      // handleRightButtonPress();
     }
-  }, [
-    webcamRef,
-    recording,
-    pause,
-    setRecording,
-    mediaRecorderRef,
-    handleDataAvailable,
-  ]);
+  }, [recording, mediaRecorderRef]);
   const handlePlayAgainRecording = useCallback(() => {
     if (recording && !pause) return;
     setRecording(true);
     setPause(false);
-    // handleRightButtonPress();
+
     const interval = setInterval(() => {
       setTime((previousTime) => previousTime + 1);
     }, 1000);
 
     timer.current = interval;
     mediaRecorderRef.current.resumeRecording();
-  }, [
-    webcamRef,
-    recording,
-    pause,
-    setRecording,
-    mediaRecorderRef,
-    handleDataAvailable,
-  ]);
+  }, [recording, pause, mediaRecorderRef]);
   const handleStopCaptureClick = useCallback(() => {
     setRunning((previousState) => !previousState);
     setRecording(false);
@@ -118,13 +94,12 @@ export default function RecordVideo() {
       setUrl(url);
       console.log("url", url, blob, blobs);
     });
-    // handleRightButtonPress();
-    setEndTime(time)
+
+    setEndTime(time);
     setTime(0);
     clearInterval(timer.current);
     timer.current = null;
-
-  }, [recording, mediaRecorderRef]);
+  }, [time, recordedChunks, mediaRecorderRef]);
 
   const handleDownload = useCallback(() => {
     if (recordedChunks.length) {
@@ -151,7 +126,7 @@ export default function RecordVideo() {
       (device) => device.deviceId !== activeDeviceId
     )?.deviceId;
     if (nextDeviceId) {
-      setActiveDeviceId(devices[devices.length-1].deviceId);
+      setActiveDeviceId(devices[devices.length - 1].deviceId);
     } else {
       // If no other device found, cycle back to the first one
       setActiveDeviceId(devices[0].deviceId);
@@ -162,19 +137,19 @@ export default function RecordVideo() {
     if (isRunning && time > 60 * 3) {
       handleStopCaptureClick();
     }
-  }, [isRunning, time]);
+  }, [handleStopCaptureClick, isRunning, time]);
 
   return (
     <div className="gap-10 flex flex-col justify-center">
       <div className="flex justify-between flex-wrap">
         <div className="relative md:w-[70%] w-full">
-          {" "}
           <Webcam
             height={1000}
             width={1000}
             audio={true}
             mirrored={false}
             ref={webcamRef}
+            // audioConstraints={{deviceId:}}
             videoConstraints={{ deviceId: activeDeviceId }}
           />
           {time ? (
@@ -273,20 +248,9 @@ export default function RecordVideo() {
           className="w-auto p-10 bg-red-600 text-white rounded-full"
           onClick={capturePhoto}
         >
-          take photo{" "}
+          take photo
         </button>
-        {/* <button
-          className="w-auto p-10 bg-red-600 text-white rounded-full"
-          onClick={getCameraPermission}
-        >
-        get Camera Permission 
-        </button> */}
       </div>
-    <div className="flex flex-col justify-center gap-5">  {devices.map((device,indx) =>
-      <button onClick={()=>setActiveDeviceId(device.deviceId)} key={indx+device.deviceId} className="text-red-500 text-center w-full">
-{device.label}
-      </button>
-      )}</div>
     </div>
   );
 }
