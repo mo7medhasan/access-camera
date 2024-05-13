@@ -231,7 +231,7 @@ export default function RecordVideo() {
               ) : null}
 
               {urlVideo ? (
-                <div className="relative aspect-[0.55] ] h-screen ">
+                <div className="relative aspect-[0.5] ] h-full max-h-screen  max-w-full">
                   <VideoPlayer src={urlVideo} autoPlay endTime={endTime} />
                   <button
                     className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
