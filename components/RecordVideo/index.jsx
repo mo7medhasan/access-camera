@@ -171,14 +171,14 @@ export default function RecordVideo() {
       <div className="flex justify-between flex-wrap">
         <div className="relative md:w-[70%] w-full">
           {" "}
-          <Webcam
+         {activeDeviceId? <Webcam
             height={1000}
             width={1000}
             audio={true}
             mirrored={true}
             ref={webcamRef}
             videoConstraints={{ deviceId: activeDeviceId }}
-          />
+          />:activeDeviceId}
           {time ? (
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2  p-5 flex justify-center items-center  bg-gray-950 text-red-500 rounded-full ">
               {displayTime(time)}
