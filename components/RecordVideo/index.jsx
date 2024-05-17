@@ -49,74 +49,64 @@ export default function RecordVideo() {
   const [isDownload, setDownload] = useState(true);
   const [pause, setPause] = useState(false);
 
-  const handleDevices = React.useCallback(
+  const handleDevices = useCallback(
     (mediaDevices) => {
-      if (mediaDevices.length) {
-        setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
-      } else {
-        // Inform user about camera switching limitations on mobile
-        console.warn("Camera switching might not be supported on this device");
-      }
+      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
     },
     [setDevices]
   );
-  useEffect(() => {
-    if (
-      "mediaDevices" in navigator &&
-      "getUserMedia" in navigator.mediaDevices
-    ) {
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then(() => setStartCamera(true))
-        .catch(() =>
-          toast({
-            title: "Wrong",
-            id: "camera",
-            description: `this Camera is not allow  `,
-            variant: "destructive",
-            swipeDirection: "center",
-          })
-        );
-    }
-  }, []);
 
   useEffect(() => {
-    setStartCamera(false);
-    navigator.getMedia = ( navigator.getUserMedia || // use the proper vendor prefix
-                       navigator.webkitGetUserMedia ||
-                       navigator.mozGetUserMedia ||
-                       navigator.msGetUserMedia)
-  let toClear=  setTimeout(() => {
-      if (
-        "mediaDevices" in navigator &&
-        "getUserMedia" in navigator.mediaDevices
-      ) {
-        navigator.mediaDevices
-          .getUserMedia({ video: true, audio: true })
-          .then(() => setStartCamera(true))
-          .catch(() => {
-            setStartCamera(false);
-            toast({
-              title: "Wrong",
-              id: "camera",
-              description: `this Camera is not allow  `,
-              variant: "destructive",
-              swipeDirection: "center",
-            });
-          });
+    async function fetchDevices() {
+      try {
+        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+        handleDevices(mediaDevices);
+      } catch (error) {
+        console.error("Error fetching devices:", error);
       }
-    }, 500);
-    return () => {
-      clearTimeout(toClear);
     }
-  }, [activeDeviceId, toast]);
-  React.useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(handleDevices);
+
+    fetchDevices();
   }, [handleDevices]);
 
-  React.useEffect(() => {
-    if (devices.length) setActiveDeviceId(devices[0].deviceId);
+  useEffect(() => {
+    if (devices.length) {
+      setActiveDeviceId(devices[0].deviceId);}
   }, [devices]);
+  useEffect(() => {
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: activeDeviceId },
+          audio: true,
+        });
+        if (webcamRef.current) {
+          webcamRef.current.srcObject = stream;
+          setStartCamera(true);
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          id: "camera",
+          description: "Camera access not allowed",
+          variant: "destructive",
+          swipeDirection: "center",
+        });
+        setStartCamera(false);
+      }
+    }
+
+    if (activeDeviceId) {
+      startCamera();
+    }
+
+    return () => {
+      if (webcamRef.current && webcamRef.current.srcObject) {
+        webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [activeDeviceId, toast]);
+
   const handleDataAvailable = useCallback(
     ({ data }) => {
       if (data.size > 0) {
@@ -203,38 +193,50 @@ export default function RecordVideo() {
     [urlImage, urlVideo]
   );
 
- const switchCamera = useCallback(async () => {
+  const switchCamera = async () => {
+    setStartCamera(false);
     if (!devices.length) {
       alert("No cameras available");
       return;
     }
 
-    // Check if more than one camera exists before attempting to switch
-    if (devices.length > 1) {
-      const index = devices.findIndex(
-        (device) => device.deviceId === activeDeviceId
-      );
-      if (index < devices.length - 1) {
-        setActiveDeviceId(devices[+index + 1].deviceId);
-      } else {
-        // If no other device found, cycle back to the first one
-        setActiveDeviceId(devices[0].deviceId);
-      }
-    } else {
-      // Inform user that camera switching is not possible
-      console.warn("Camera switching is not possible with a single camera");
-    }
+    const index = devices.findIndex((device) => device.deviceId === activeDeviceId);
+    const nextDeviceId = index < devices.length - 1 ? devices[index + 1].deviceId : devices[0].deviceId;
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { deviceId: activeDeviceId },
-        audio: true,
-      });
-      webcamRef.current.srcObject = stream;
-    } catch (error) {
-      console.error("Error switching camera:", error);
-    }
-  }, [devices, activeDeviceId, webcamRef]);
+    setActiveDeviceId(nextDeviceId);
+  };
+//  const switchCamera = useCallback(async () => {
+//     if (!devices.length) {
+//       alert("No cameras available");
+//       return;
+//     }
+
+//     // Check if more than one camera exists before attempting to switch
+//     if (devices.length > 1) {
+//       const index = devices.findIndex(
+//         (device) => device.deviceId === activeDeviceId
+//       );
+//       if (index < devices.length - 1) {
+//         setActiveDeviceId(devices[+index + 1].deviceId);
+//       } else {
+//         // If no other device found, cycle back to the first one
+//         setActiveDeviceId(devices[0].deviceId);
+//       }
+//     } else {
+//       // Inform user that camera switching is not possible
+//       console.warn("Camera switching is not possible with a single camera");
+//     }
+
+//     try {
+//       const stream = await navigator.mediaDevices.getUserMedia({
+//         video: { deviceId: activeDeviceId },
+//         audio: true,
+//       });
+//       webcamRef.current.srcObject = stream;
+//     } catch (error) {
+//       console.error("Error switching camera:", error);
+//     }
+//   }, [devices, activeDeviceId, webcamRef]);
   useEffect(() => {
     if (file) {
       setDownload(false);
@@ -269,17 +271,14 @@ export default function RecordVideo() {
   return (
     <div className="gap-10 flex flex-col w-full h-screen justify-center">
       <div className="relative flex justify-center items-center w-full h-screen">
-        {activeDeviceId&&startCamera ? (
+      {activeDeviceId && startCamera ? (
           <Webcam
-            height={1000}
-            width={1000}
+            height={size.height || 1000}
+            width={size.width || 1000}
             muted={true}
             audio={true}
             mirrored={false}
             ref={webcamRef}
-            // audioConstraints={{
-            //   deviceId: "default",
-            // }}
             videoConstraints={{ deviceId: activeDeviceId, aspectRatio: ratio }}
           />
         ) : null}
