@@ -196,7 +196,7 @@ export default function RecordVideo() {
     <div className="gap-10 flex flex-col  h-full w-full justify-center">
      {startCamera? <div className="flex justify-between flex-wrap">
         <div className="relative flex justify-center items-center w-full h-screen">
-        <Suspense fallback={<p>Loading video...</p>}>
+     
           <Webcam
             height={size.height}
             width={size.width}
@@ -208,7 +208,7 @@ export default function RecordVideo() {
               deviceId: "default",
             }}
             videoConstraints={{ deviceId: activeDeviceId, aspectRatio: ratio }}
-          /></Suspense>
+          />
           {time ? (
             <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
               {displayTime(time)}
