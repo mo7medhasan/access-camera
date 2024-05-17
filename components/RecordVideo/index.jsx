@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import RecordRTC from "recordrtc";
 import VideoPlayer from "../VideoComponents/VideoPlayer";
@@ -15,6 +15,7 @@ import {
   Video,
 } from "lucide-react";
 import { useToast } from "../ui/use-toast";
+import Image from "next/image";
 
 export default function RecordVideo() {
   const { toast } = useToast();
@@ -29,11 +30,20 @@ export default function RecordVideo() {
   const [urlVideo, setUrlVideo] = useState(null);
   const [time, setTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
+  const [startCamera, setStartCamera] = useState(false);
   const [recording, setRecording] = useState(false);
   const [isRunning, setRunning] = useState(false);
   const [isDownload, setDownload] = useState(true);
   const [pause, setPause] = useState(false);
-
+  if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+    navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>toast({
+      title: "Wrong",
+      description: `this Camera is not allow  `,
+      variant: "destructive",
+      swipeDirection: "center",
+    }))
+   
+  }
   const handleDevices = React.useCallback(
     (mediaDevices) => {
       setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
@@ -180,10 +190,12 @@ export default function RecordVideo() {
   const ratio = isLandscape
     ? size.width / size.height
     : size.height / size.width;
-  return (
+   
+      return (
     <div className="gap-10 flex flex-col justify-center">
-      <div className="flex justify-between flex-wrap">
+     {startCamera? <div className="flex justify-between flex-wrap">
         <div className="relative flex justify-center items-center w-full h-screen">
+        <Suspense fallback={<p>Loading video...</p>}>
           <Webcam
             height={size.height}
             width={size.width}
@@ -195,7 +207,7 @@ export default function RecordVideo() {
               deviceId: "default",
             }}
             videoConstraints={{ deviceId: activeDeviceId, aspectRatio: ratio }}
-          />
+          /></Suspense>
           {time ? (
             <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
               {displayTime(time)}
@@ -206,8 +218,9 @@ export default function RecordVideo() {
             <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
               {urlImage ? (
                 <div className="relative rounded-2xl overflow-hidden aspect-[0.55] h-screen  bg-black  ">
-                  <img
+                  <Image
                     src={urlImage}
+                    fill sizes="50vw"
                     alt="Screenshot"
                     className="w-full h-full object-contain object-center aspect-[0.55]"
                   />
@@ -232,7 +245,7 @@ export default function RecordVideo() {
 
               {urlVideo ? (
                 <div className="relative aspect-[0.5] ] h-full max-h-screen  max-w-full">
-                  <VideoPlayer src={urlVideo} autoPlay endTime={endTime} />
+                <Suspense fallback={<p>Loading video...</p>}> <VideoPlayer src={urlVideo} autoPlay endTime={endTime} /></Suspense>
                   <button
                     className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
                     onClick={() => {
@@ -314,7 +327,7 @@ export default function RecordVideo() {
             ) : null}
           </div>
         </div>
-      </div>
+      </div>:<p>Loading Camera...</p>}
     </div>
   );
 }
