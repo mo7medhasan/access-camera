@@ -60,7 +60,8 @@ export default function RecordVideo() {
   
   useEffect(() => {
     setStartCamera(false)
-    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+ setTimeout(() => {
+  if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
       navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>{
       setStartCamera(false)
         toast({
@@ -73,6 +74,7 @@ export default function RecordVideo() {
     })
      
     }
+ }, 200);   
   }, [activeDeviceId])
   React.useEffect(() => {
    
