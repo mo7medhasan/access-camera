@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useToast } from "../ui/use-toast";
 import Image from "next/image";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 export default function RecordVideo() {
   const { toast } = useToast();
@@ -220,7 +221,7 @@ export default function RecordVideo() {
      {startCamera?
         <div className="relative flex justify-center items-center w-full h-screen">
      
-          <Webcam
+        {activeDeviceId?  <Webcam
             height={size.height}
             width={size.width}
             muted={true}
@@ -231,13 +232,34 @@ export default function RecordVideo() {
               deviceId: "default",
             }}
             videoConstraints={{ deviceId: activeDeviceId, aspectRatio: ratio }}
-          />
+          />:null}
           {time ? (
             <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
               {displayTime(time)}
             </div>
           ) : null}
+          <div className="absolute top-[20%] right-6 ">
+          <DropdownMenu>
+  <DropdownMenuTrigger className="backdrop-blur-lg  p-5 flex justify-center items-center  bg-black/30 rounded-full ">     <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fillRule="evenodd"
+          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+          clipRule="evenodd"
+        />
+      </svg></DropdownMenuTrigger>
+  <DropdownMenuContent>
+    
+   {devices.map(device=> <DropdownMenuItem key={device.deviceId} onClick={()=>setActiveDeviceId(device.deviceId)}>{device.label}</DropdownMenuItem>)}
+   
+  </DropdownMenuContent>
+</DropdownMenu>
 
+            </div>
           {urlImage || urlVideo ? (
             <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
               {urlImage ? (
