@@ -74,48 +74,18 @@ export default function RecordVideo() {
       setActiveDeviceId(devices[0].deviceId);}
   }, [devices]);
   useEffect(() => {
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: activeDeviceId },
-          audio: true,
-        });
-        if (webcamRef.current) {
-          webcamRef.current.srcObject = stream;
-          setStartCamera(true);
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          id: "camera",
-          description: "Camera access not allowed",
-          variant: "destructive",
-          swipeDirection: "center",
-        });
-        setStartCamera(false);
-      }
-    }
-
-    if (activeDeviceId) {
-      startCamera();
-    }
-
-    return () => {
-      if (webcamRef.current && webcamRef.current.srcObject) {
-        webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [activeDeviceId, toast]);
-  useEffect(() => {
     async function funStartCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { deviceId: activeDeviceId },
           audio: true,
-        });
+        }); 
+         setStartCamera(true);
         if (webcamRef.current) {
           webcamRef.current.srcObject = stream;
-          setStartCamera(true);
+        
+        }else{
+          funStartCamera()
         }
       } catch (error) {
         toast({
@@ -138,7 +108,8 @@ export default function RecordVideo() {
         webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [activeDeviceId, toast]);
+
   const handleDataAvailable = useCallback(
     ({ data }) => {
       if (data.size > 0) {
@@ -303,7 +274,7 @@ export default function RecordVideo() {
   return (
     <div className="gap-10 flex flex-col w-full h-screen justify-center">
       <div className="relative flex justify-center items-center w-full h-screen">
-      {activeDeviceId  ? (
+      {activeDeviceId && startCamera ? (
           <Webcam
             height={size.height || 1000}
             width={size.width || 1000}
