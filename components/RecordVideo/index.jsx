@@ -96,7 +96,7 @@ export default function RecordVideo() {
             });
           });
       }
-    }, 200);
+    }, 1000);
   }, [activeDeviceId]);
   React.useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
