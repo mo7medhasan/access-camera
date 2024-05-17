@@ -3,6 +3,7 @@ import React, {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -191,7 +192,7 @@ export default function RecordVideo() {
     [urlImage, urlVideo]
   );
 
-  const switchCamera = async () => {
+  const switchCamera =  () => {
     setStartCamera(false);
     if (!devices.length) {
       alert("No cameras available");
@@ -233,18 +234,19 @@ export default function RecordVideo() {
   }, [handleStopCaptureClick, isRunning, time]);
   // console.log("file", file);
   const size = useWindowSize();
-  const isLandscape = size.height <= size.width;
-  const ratio = isLandscape
-    ? size.width / size.height
-    : size.height / size.width;
+  const isLandscape = useMemo(()=> size.height <= size.width,[size.height,size.width])
+ const ratio =  useMemo(() => isLandscape
+  ? size.width / size.height
+  : size.height / size.width, [isLandscape, size.height, size.width])
+  
 
   return (
     <div className="gap-10 flex flex-col w-full h-screen justify-center">
       <div className="relative flex justify-center items-center w-full h-screen">
-        {activeDeviceId ? (
+        {activeDeviceId&&startCamera ? (
           <Webcam
-            height={size.height}
-            width={size.width}
+            height={size.height||1000}
+            width={size.width||1000}
             muted={true}
             audio={true}
             mirrored={false}
