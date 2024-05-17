@@ -404,7 +404,7 @@ export default function RecordVideo() {
           ) : null}
         </div>
       </div>
-      {!startCamera?null:
+      {startCamera?null:
       <div className="fixed  flex h-screen w-screen bg-white items-center justify-center text-center text-blue-700  animate-pulse  text-xl font-semibold">
         Loading Camera...
       </div>
