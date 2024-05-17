@@ -80,11 +80,13 @@ export default function RecordVideo() {
           video: { deviceId: activeDeviceId },
           audio: true,
         }); 
-         setStartCamera(true);
-        if (webcamRef.current&&stream&&startCamera) {
+       if(stream) { setStartCamera(true);
+        if (webcamRef.current&&startCamera) {
           webcamRef.current.srcObject = stream;
         
         }else{
+          funStartCamera()
+        }}else{
           funStartCamera()
         }
       } catch (error) {
@@ -108,7 +110,7 @@ export default function RecordVideo() {
         webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [activeDeviceId,webcamRef]);
+  }, [activeDeviceId,webcamRef,devices]);
 
   const handleDataAvailable = useCallback(
     ({ data }) => {
