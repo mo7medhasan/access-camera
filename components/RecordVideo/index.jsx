@@ -51,9 +51,13 @@ export default function RecordVideo() {
 
   const handleDevices = React.useCallback(
     (mediaDevices) => {
-      setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
+      if (mediaDevices.length) {
+        setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
+      } else {
+        // Inform user about camera switching limitations on mobile
+        console.warn("Camera switching might not be supported on this device");
+      }
     },
-
     [setDevices]
   );
   useEffect(() => {
@@ -196,23 +200,33 @@ export default function RecordVideo() {
     [urlImage, urlVideo]
   );
 
-  const switchCamera =  () => {
-    setStartCamera(false);
+  const switchCamera = useCallback(async () => {
     if (!devices.length) {
       alert("No cameras available");
       return;
     }
 
-    const index = devices.findIndex(
-      (device) => device.deviceId == activeDeviceId
-    );
-    if (index < devices.length - 1) {
+    // Check if more than one camera exists before attempting to switch
+    if (devices.length > 1) {
+      const index = devices.findIndex(
+        (device) => device.deviceId === activeDeviceId
+      );
       setActiveDeviceId(devices[+index + 1].deviceId);
     } else {
-      // If no other device found, cycle back to the first one
-      setActiveDeviceId(devices[0].deviceId);
+      // Inform user that camera switching is not possible
+      console.warn("Camera switching is not possible with a single camera");
     }
-  };
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: activeDeviceId },
+        audio: true,
+      });
+      webcamRef.current.srcObject = stream;
+    } catch (error) {
+      console.error("Error switching camera:", error);
+    }
+  }, [devices, activeDeviceId, webcamRef]);
   useEffect(() => {
     if (file) {
       setDownload(false);
