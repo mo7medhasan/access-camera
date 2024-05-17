@@ -107,7 +107,7 @@ export default function RecordVideo() {
     };
   }, [activeDeviceId, toast]);
   useEffect(() => {
-    async function startCamera() {
+    async function funStartCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { deviceId: activeDeviceId },
@@ -130,7 +130,7 @@ export default function RecordVideo() {
     }
 
     if (activeDeviceId) {
-      startCamera();
+      funStartCamera();
     }
 
     return () => {
@@ -303,7 +303,7 @@ export default function RecordVideo() {
   return (
     <div className="gap-10 flex flex-col w-full h-screen justify-center">
       <div className="relative flex justify-center items-center w-full h-screen">
-      {activeDeviceId && startCamera ? (
+      {activeDeviceId  ? (
           <Webcam
             height={size.height || 1000}
             width={size.width || 1000}
@@ -349,7 +349,7 @@ export default function RecordVideo() {
           </DropdownMenu>
         </div>
         {urlImage || urlVideo ? (
-          <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
+          <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-50">
             {urlImage ? (
               <div className="relative rounded-2xl overflow-hidden aspect-[0.55] h-screen  bg-black  ">
                 <Image
@@ -405,7 +405,7 @@ export default function RecordVideo() {
             ) : null}
           </div>
         ) : null}
-        <div className="absolute bottom-0 inset-x-0 bg-black/20 sm:py-5 py-3  flex justify-center items-center flex-wrap sm:gap-5 gap-2">
+        <div className="absolute bottom-0 z-50  inset-x-0 bg-black/20 sm:py-5 py-3  flex justify-center items-center flex-wrap sm:gap-5 gap-2">
           {!recording && !pause ? (
             <>
               <UploadsFile onChange={setFile} />
@@ -464,7 +464,7 @@ export default function RecordVideo() {
         </div>
       </div>
       {startCamera?null:
-      <div className="fixed  flex h-screen w-screen bg-white items-center justify-center text-center text-blue-700  animate-pulse  text-xl font-semibold">
+      <div className="absolute  flex h-screen w-screen bg-white items-center justify-center text-center text-blue-700  animate-pulse  text-xl font-semibold">
         Loading Camera...
       </div>
       }
