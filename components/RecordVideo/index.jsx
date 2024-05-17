@@ -197,13 +197,13 @@ export default function RecordVideo() {
             videoConstraints={{ deviceId: activeDeviceId, aspectRatio: ratio }}
           />
           {time ? (
-            <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
+            <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
               {displayTime(time)}
             </div>
           ) : null}
 
           {urlImage || urlVideo ? (
-            <div className=" flex  items-center justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
+            <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
               {urlImage ? (
                 <div className="relative rounded-2xl overflow-hidden aspect-[0.55] h-screen  bg-black  ">
                   <img
@@ -221,7 +221,7 @@ export default function RecordVideo() {
                   </button>
                   {urlImage && isDownload ? (
                     <button
-                      className="  absolute  bottom-10 left-10 bg-white p-5 m-5 flex justify-center items-center rounded-full"
+                      className="  absolute  bottom-10 left-10 bg-white p-5  flex justify-center items-center rounded-full"
                       onClick={() => handleDownload(urlImage)}
                     >
                       <ArrowDownToLine />
@@ -254,25 +254,25 @@ export default function RecordVideo() {
               ) : null}
             </div>
           ) : null}
-          <div className="absolute bottom-0 inset-x-0 bg-black/20 flex justify-center items-center flex-wrap gap-5">
+          <div className="absolute bottom-0 inset-x-0 bg-black/20 sm:py-5 py-3  flex justify-center items-center flex-wrap sm:gap-5 gap-2">
             {!recording && !pause ? (
               <>
-                {" "}
+                
                 <UploadsFile onChange={setFile} />
                 <button
-                  className="bg-white p-5 m-5 flex justify-center items-center rounded-full"
+                  className="bg-white p-5  flex justify-center items-center rounded-full"
                   onClick={handleStartCaptureClick}
                 >
                   <Video />
-                </button>{" "}
+                </button>
                 <button
-                  className="bg-white p-5 m-5 flex justify-center items-center rounded-full"
+                  className="bg-white p-5  flex justify-center items-center rounded-full"
                   onClick={capturePhoto}
                 >
                   <Camera />
                 </button>
                 <button
-                  className="bg-white p-5 m-5 flex justify-center items-center rounded-full"
+                  className="bg-white p-5  flex justify-center items-center rounded-full"
                   onClick={switchCamera}
                 >
                   <SwitchCamera />
@@ -284,18 +284,18 @@ export default function RecordVideo() {
                 {recording || pause ? (
                   <>
                     <button
-                      className="bg-white p-2  flex justify-center items-center rounded-full"
+                      className="bg-white  p-5   flex justify-center items-center rounded-full"
                       onClick={handleStopCaptureClick}
                     >
                       <CircleStop />
-                    </button>{" "}
+                    </button>
                   </>
                 ) : null}
                 {recording && !pause ? (
                   <>
-                    {" "}
+                    
                     <button
-                      className="bg-white p-2  flex justify-center items-center rounded-full"
+                      className="bg-white p-5  flex justify-center items-center rounded-full"
                       onClick={handlePauseRecording}
                     >
                       <OctagonPause />
@@ -304,7 +304,7 @@ export default function RecordVideo() {
                 ) : null}
                 {!recording && pause ? (
                   <button
-                    className="bg-white p-2  flex justify-center items-center rounded-full"
+                    className="bg-white  p-5   flex justify-center items-center rounded-full"
                     onClick={handlePlayAgainRecording}
                   >
                     <Disc />
