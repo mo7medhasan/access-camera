@@ -200,7 +200,7 @@ export default function RecordVideo() {
     [urlImage, urlVideo]
   );
 
-  const switchCamera = useCallback(async () => {
+ const switchCamera = useCallback(async () => {
     if (!devices.length) {
       alert("No cameras available");
       return;
@@ -211,7 +211,12 @@ export default function RecordVideo() {
       const index = devices.findIndex(
         (device) => device.deviceId === activeDeviceId
       );
-      setActiveDeviceId(devices[+index + 1].deviceId);
+      if (index < devices.length - 1) {
+        setActiveDeviceId(devices[+index + 1].deviceId);
+      } else {
+        // If no other device found, cycle back to the first one
+        setActiveDeviceId(devices[0].deviceId);
+      }
     } else {
       // Inform user that camera switching is not possible
       console.warn("Camera switching is not possible with a single camera");
