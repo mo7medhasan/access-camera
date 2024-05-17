@@ -13,7 +13,7 @@ export default function UploadsFile({ onChange, image }){
     };
   
     return (
-      <button className="bg-white p-5 m-5 flex justify-center items-center rounded-full"
+      <button className="bg-white p-5 flex justify-center items-center rounded-full"
         onClick={() => {
           imageRef.current?.click();
         }}
