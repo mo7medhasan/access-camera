@@ -1,5 +1,11 @@
 "use client";
-import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Webcam from "react-webcam";
 import RecordRTC from "recordrtc";
 import VideoPlayer from "../VideoComponents/VideoPlayer";
@@ -16,7 +22,12 @@ import {
 } from "lucide-react";
 import { useToast } from "../ui/use-toast";
 import Image from "next/image";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 export default function RecordVideo() {
   const { toast } = useToast();
@@ -45,39 +56,49 @@ export default function RecordVideo() {
     [setDevices]
   );
   useEffect(() => {
-    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-      navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>
-        toast({
-        title: "Wrong",
-        id:"camera",
-        description: `this Camera is not allow  `,
-        variant: "destructive",
-        swipeDirection: "center",
-      }))
-     
+    if (
+      "mediaDevices" in navigator &&
+      "getUserMedia" in navigator.mediaDevices
+    ) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then(() => setStartCamera(true))
+        .catch(() =>
+          toast({
+            title: "Wrong",
+            id: "camera",
+            description: `this Camera is not allow  `,
+            variant: "destructive",
+            swipeDirection: "center",
+          })
+        );
     }
-  }, [])
-  
+  }, []);
+
   useEffect(() => {
-    setStartCamera(false)
- setTimeout(() => {
-  if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-      navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>{
-      setStartCamera(false)
-        toast({
-        title: "Wrong",
-        id:"camera",
-        description: `this Camera is not allow  `,
-        variant: "destructive",
-        swipeDirection: "center",
-      })
-    })
-     
-    }
- }, 200);   
-  }, [activeDeviceId])
+    setStartCamera(false);
+    setTimeout(() => {
+      if (
+        "mediaDevices" in navigator &&
+        "getUserMedia" in navigator.mediaDevices
+      ) {
+        navigator.mediaDevices
+          .getUserMedia({ video: true, audio: true })
+          .then(() => setStartCamera(true))
+          .catch(() => {
+            setStartCamera(false);
+            toast({
+              title: "Wrong",
+              id: "camera",
+              description: `this Camera is not allow  `,
+              variant: "destructive",
+              swipeDirection: "center",
+            });
+          });
+      }
+    }, 200);
+  }, [activeDeviceId]);
   React.useEffect(() => {
-   
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
 
@@ -171,8 +192,7 @@ export default function RecordVideo() {
   );
 
   const switchCamera = async () => {
-    
-    setStartCamera(false)
+    setStartCamera(false);
     if (!devices.length) {
       alert("No cameras available");
       return;
@@ -217,165 +237,178 @@ export default function RecordVideo() {
   const ratio = isLandscape
     ? size.width / size.height
     : size.height / size.width;
-   
-      return (
+
+  return (
     <div className="gap-10 flex flex-col w-full h-screen justify-center">
-     {startCamera?
-        <div className="relative flex justify-center items-center w-full h-screen">
-     
-        {activeDeviceId?  <Webcam
+      <div className="relative flex justify-center items-center w-full h-screen">
+        {activeDeviceId ? (
+          <Webcam
             height={size.height}
             width={size.width}
             muted={true}
             audio={true}
             mirrored={false}
             ref={webcamRef}
-            audioConstraints={{
-              deviceId: "default",
-            }}
+            // audioConstraints={{
+            //   deviceId: "default",
+            // }}
             videoConstraints={{ deviceId: activeDeviceId, aspectRatio: ratio }}
-          />:null}
-          {time ? (
-            <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
-              {displayTime(time)}
-            </div>
-          ) : null}
-          <div className="absolute top-[20%] right-6 ">
+          />
+        ) : null}
+        {time ? (
+          <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
+            {displayTime(time)}
+          </div>
+        ) : null}
+        <div className="absolute top-[20%] right-6 ">
           <DropdownMenu>
-  <DropdownMenuTrigger className="backdrop-blur-lg  p-5 flex justify-center items-center  bg-black/30 rounded-full ">     <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          fillRule="evenodd"
-          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-          clipRule="evenodd"
-        />
-      </svg></DropdownMenuTrigger>
-  <DropdownMenuContent>
-    
-   {devices.map(device=> <DropdownMenuItem key={device.deviceId} onClick={()=>setActiveDeviceId(device.deviceId)}>{device.label}</DropdownMenuItem>)}
-   
-  </DropdownMenuContent>
-</DropdownMenu>
-
-            </div>
-          {urlImage || urlVideo ? (
-            <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
-              {urlImage ? (
-                <div className="relative rounded-2xl overflow-hidden aspect-[0.55] h-screen  bg-black  ">
-                  <Image
-                    src={urlImage}
-                    fill sizes="50vw"
-                    alt="Screenshot"
-                    className="w-full h-full object-contain object-center aspect-[0.55]"
-                  />
+            <DropdownMenuTrigger className="backdrop-blur-lg  p-5 flex justify-center items-center  bg-black/30 rounded-full ">
+              {" "}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {devices.map((device) => (
+                <DropdownMenuItem
+                  key={device.deviceId}
+                  onClick={() => setActiveDeviceId(device.deviceId)}
+                >
+                  {device.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {urlImage || urlVideo ? (
+          <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
+            {urlImage ? (
+              <div className="relative rounded-2xl overflow-hidden aspect-[0.55] h-screen  bg-black  ">
+                <Image
+                  src={urlImage}
+                  fill
+                  sizes="50vw"
+                  alt="Screenshot"
+                  className="w-full h-full object-contain object-center aspect-[0.55]"
+                />
+                <button
+                  className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
+                  onClick={() => {
+                    setUrlImage(null);
+                  }}
+                >
+                  X
+                </button>
+                {urlImage && isDownload ? (
                   <button
-                    className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
-                    onClick={() => {
-                      setUrlImage(null);
-                    }}
+                    className="  absolute  bottom-10 left-10 bg-white p-5  flex justify-center items-center rounded-full"
+                    onClick={() => handleDownload(urlImage)}
                   >
-                    X
+                    <ArrowDownToLine />
                   </button>
-                  {urlImage && isDownload ? (
-                    <button
-                      className="  absolute  bottom-10 left-10 bg-white p-5  flex justify-center items-center rounded-full"
-                      onClick={() => handleDownload(urlImage)}
-                    >
-                      <ArrowDownToLine />
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
-
-              {urlVideo ? (
-                <div className="relative aspect-[0.5] ] h-full max-h-screen  max-w-full">
-                <Suspense fallback={<p>Loading video...</p>}> <VideoPlayer src={urlVideo} autoPlay endTime={endTime} /></Suspense>
-                  <button
-                    className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
-                    onClick={() => {
-                      setUrlVideo(null);
-                      setRecordedChunks([]);
-                    }}
-                  >
-                    X
-                  </button>
-                  {urlVideo && isDownload ? (
-                    <button
-                      className="  absolute  bottom-10 left-10 bg-white p-5 m-5 flex justify-center items-center rounded-full"
-                      onClick={() => handleDownload(urlVideo)}
-                    >
-                      <ArrowDownToLine />
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-          <div className="absolute bottom-0 inset-x-0 bg-black/20 sm:py-5 py-3  flex justify-center items-center flex-wrap sm:gap-5 gap-2">
-            {!recording && !pause ? (
-              <>
-                
-                <UploadsFile onChange={setFile} />
-                <button
-                  className="bg-white p-5  flex justify-center items-center rounded-full"
-                  onClick={handleStartCaptureClick}
-                >
-                  <Video />
-                </button>
-                <button
-                  className="bg-white p-5  flex justify-center items-center rounded-full"
-                  onClick={capturePhoto}
-                >
-                  <Camera />
-                </button>
-                <button
-                  className="bg-white p-5  flex justify-center items-center rounded-full"
-                  onClick={switchCamera}
-                >
-                  <SwitchCamera />
-                </button>
-              </>
+                ) : null}
+              </div>
             ) : null}
-            {recording || pause ? (
-              <div className="flex items-center  gap-4  h-auto py-2 px-4 rounded-full bg-black/20 ">
-                {recording || pause ? (
-                  <>
-                    <button
-                      className="bg-white  p-5   flex justify-center items-center rounded-full"
-                      onClick={handleStopCaptureClick}
-                    >
-                      <CircleStop />
-                    </button>
-                  </>
-                ) : null}
-                {recording && !pause ? (
-                  <>
-                    
-                    <button
-                      className="bg-white p-5  flex justify-center items-center rounded-full"
-                      onClick={handlePauseRecording}
-                    >
-                      <OctagonPause />
-                    </button>
-                  </>
-                ) : null}
-                {!recording && pause ? (
+
+            {urlVideo ? (
+              <div className="relative aspect-[0.5] ] h-full max-h-screen  max-w-full">
+                <Suspense fallback={<p>Loading video...</p>}>
+                  {" "}
+                  <VideoPlayer src={urlVideo} autoPlay endTime={endTime} />
+                </Suspense>
+                <button
+                  className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
+                  onClick={() => {
+                    setUrlVideo(null);
+                    setRecordedChunks([]);
+                  }}
+                >
+                  X
+                </button>
+                {urlVideo && isDownload ? (
                   <button
-                    className="bg-white  p-5   flex justify-center items-center rounded-full"
-                    onClick={handlePlayAgainRecording}
+                    className="  absolute  bottom-10 left-10 bg-white p-5 m-5 flex justify-center items-center rounded-full"
+                    onClick={() => handleDownload(urlVideo)}
                   >
-                    <Disc />
+                    <ArrowDownToLine />
                   </button>
                 ) : null}
               </div>
             ) : null}
           </div>
+        ) : null}
+        <div className="absolute bottom-0 inset-x-0 bg-black/20 sm:py-5 py-3  flex justify-center items-center flex-wrap sm:gap-5 gap-2">
+          {!recording && !pause ? (
+            <>
+              <UploadsFile onChange={setFile} />
+              <button
+                className="bg-white p-5  flex justify-center items-center rounded-full"
+                onClick={handleStartCaptureClick}
+              >
+                <Video />
+              </button>
+              <button
+                className="bg-white p-5  flex justify-center items-center rounded-full"
+                onClick={capturePhoto}
+              >
+                <Camera />
+              </button>
+              <button
+                className="bg-white p-5  flex justify-center items-center rounded-full"
+                onClick={switchCamera}
+              >
+                <SwitchCamera />
+              </button>
+            </>
+          ) : null}
+          {recording || pause ? (
+            <div className="flex items-center  gap-4  h-auto py-2 px-4 rounded-full bg-black/20 ">
+              {recording || pause ? (
+                <>
+                  <button
+                    className="bg-white  p-5   flex justify-center items-center rounded-full"
+                    onClick={handleStopCaptureClick}
+                  >
+                    <CircleStop />
+                  </button>
+                </>
+              ) : null}
+              {recording && !pause ? (
+                <>
+                  <button
+                    className="bg-white p-5  flex justify-center items-center rounded-full"
+                    onClick={handlePauseRecording}
+                  >
+                    <OctagonPause />
+                  </button>
+                </>
+              ) : null}
+              {!recording && pause ? (
+                <button
+                  className="bg-white  p-5   flex justify-center items-center rounded-full"
+                  onClick={handlePlayAgainRecording}
+                >
+                  <Disc />
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
-     :<div className=" flex h-full w-full items-center justify-center text-center text-blue-700  animate-pulse  text-xl font-semibold">Loading Camera...</div>}
+      </div>
+      {!startCamera?null:
+      <div className="fixed  flex h-screen w-screen bg-white items-center justify-center text-center text-blue-700  animate-pulse  text-xl font-semibold">
+        Loading Camera...
+      </div>
+      }
     </div>
   );
 }
