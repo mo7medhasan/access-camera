@@ -43,10 +43,10 @@ export default function RecordVideo() {
 
     [setDevices]
   );
-
-  React.useEffect(() => {
+  useEffect(() => {
     if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-      navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>toast({
+      navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>
+        toast({
         title: "Wrong",
         id:"camera",
         description: `this Camera is not allow  `,
@@ -55,6 +55,26 @@ export default function RecordVideo() {
       }))
      
     }
+  }, [])
+  
+  useEffect(() => {
+    setStartCamera(false)
+    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>{
+      setStartCamera(false)
+        toast({
+        title: "Wrong",
+        id:"camera",
+        description: `this Camera is not allow  `,
+        variant: "destructive",
+        swipeDirection: "center",
+      })
+    })
+     
+    }
+  }, [activeDeviceId])
+  React.useEffect(() => {
+   
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
 
