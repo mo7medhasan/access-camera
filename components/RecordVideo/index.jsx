@@ -38,6 +38,7 @@ export default function RecordVideo() {
   if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
     navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>toast({
       title: "Wrong",
+      id:"camera",
       description: `this Camera is not allow  `,
       variant: "destructive",
       swipeDirection: "center",
@@ -327,7 +328,7 @@ export default function RecordVideo() {
             ) : null}
           </div>
         </div>
-      </div>:<p>Loading Camera...</p>}
+      </div>:<div className=" flex h-full w-full items-center justify-center text-center text-blue-700  animate-pulse  text-xl font-semibold">Loading Camera...</div>}
     </div>
   );
 }
