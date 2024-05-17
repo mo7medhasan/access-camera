@@ -101,9 +101,7 @@ export default function RecordVideo() {
       }
     }
 
-    if (activeDeviceId) {
-      funStartCamera();
-    }
+    funStartCamera();
 
     return () => {
       if (webcamRef.current && webcamRef.current.srcObject) {
