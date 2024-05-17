@@ -193,7 +193,7 @@ export default function RecordVideo() {
     : size.height / size.width;
    
       return (
-    <div className="gap-10 flex flex-col justify-center">
+    <div className="gap-10 flex flex-col  h-full w-full justify-center">
      {startCamera? <div className="flex justify-between flex-wrap">
         <div className="relative flex justify-center items-center w-full h-screen">
         <Suspense fallback={<p>Loading video...</p>}>
