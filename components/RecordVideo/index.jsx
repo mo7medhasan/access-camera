@@ -78,6 +78,10 @@ export default function RecordVideo() {
 
   useEffect(() => {
     setStartCamera(false);
+    navigator.getMedia = ( navigator.getUserMedia || // use the proper vendor prefix
+                       navigator.webkitGetUserMedia ||
+                       navigator.mozGetUserMedia ||
+                       navigator.msGetUserMedia)
     setTimeout(() => {
       if (
         "mediaDevices" in navigator &&
