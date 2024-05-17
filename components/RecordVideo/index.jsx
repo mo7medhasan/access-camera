@@ -35,16 +35,7 @@ export default function RecordVideo() {
   const [isRunning, setRunning] = useState(false);
   const [isDownload, setDownload] = useState(true);
   const [pause, setPause] = useState(false);
-  if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-    navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>toast({
-      title: "Wrong",
-      id:"camera",
-      description: `this Camera is not allow  `,
-      variant: "destructive",
-      swipeDirection: "center",
-    }))
-   
-  }
+
   const handleDevices = React.useCallback(
     (mediaDevices) => {
       setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
@@ -54,6 +45,16 @@ export default function RecordVideo() {
   );
 
   React.useEffect(() => {
+    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({video: true,audio:true}).then(()=>setStartCamera(true)).catch(()=>toast({
+        title: "Wrong",
+        id:"camera",
+        description: `this Camera is not allow  `,
+        variant: "destructive",
+        swipeDirection: "center",
+      }))
+     
+    }
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
 
