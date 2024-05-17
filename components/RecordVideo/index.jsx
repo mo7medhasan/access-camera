@@ -106,7 +106,39 @@ export default function RecordVideo() {
       }
     };
   }, [activeDeviceId, toast]);
+  useEffect(() => {
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: activeDeviceId },
+          audio: true,
+        });
+        if (webcamRef.current) {
+          webcamRef.current.srcObject = stream;
+          setStartCamera(true);
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          id: "camera",
+          description: "Camera access not allowed",
+          variant: "destructive",
+          swipeDirection: "center",
+        });
+        setStartCamera(false);
+      }
+    }
 
+    if (activeDeviceId) {
+      startCamera();
+    }
+
+    return () => {
+      if (webcamRef.current && webcamRef.current.srcObject) {
+        webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
   const handleDataAvailable = useCallback(
     ({ data }) => {
       if (data.size > 0) {
