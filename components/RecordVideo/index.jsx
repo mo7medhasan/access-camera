@@ -86,7 +86,7 @@ export default function RecordVideo() {
                        navigator.webkitGetUserMedia ||
                        navigator.mozGetUserMedia ||
                        navigator.msGetUserMedia)
-    setTimeout(() => {
+  let toClear=  setTimeout(() => {
       if (
         "mediaDevices" in navigator &&
         "getUserMedia" in navigator.mediaDevices
@@ -105,8 +105,11 @@ export default function RecordVideo() {
             });
           });
       }
-    }, 1000);
-  }, [activeDeviceId]);
+    }, 500);
+    return () => {
+      clearTimeout(toClear);
+    }
+  }, [activeDeviceId, toast]);
   React.useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
@@ -268,8 +271,8 @@ export default function RecordVideo() {
       <div className="relative flex justify-center items-center w-full h-screen">
         {activeDeviceId&&startCamera ? (
           <Webcam
-            height={size.height||1000}
-            width={size.width||1000}
+            height={1000}
+            width={1000}
             muted={true}
             audio={true}
             mirrored={false}
