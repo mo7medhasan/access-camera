@@ -90,12 +90,13 @@ export default function RecordVideo() {
           funStartCamera()
         }
       } catch (error) {
-        if(activeDeviceId)funStartCamera()
+        if(webcamRef.current&&activeDeviceId&&startCamera)funStartCamera()
+          else
         toast({
           title: "Error",
           id: "camera",
           description: `Camera access not allowed
-          ${error}`,
+        and you have error :  ${error}`,
           variant: "destructive",
           swipeDirection: "center",
         });
