@@ -71,7 +71,7 @@ export default function RecordVideo() {
 
   useEffect(() => {
     if (devices.length) {
-      setActiveDeviceId(devices[0].deviceId);
+      setActiveDeviceId(devices[devices.length-1].deviceId);
     }
   }, [devices]);
 
