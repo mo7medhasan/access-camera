@@ -281,7 +281,7 @@ export default function RecordVideo() {
   return (
     <div className="gap-10 flex flex-col w-full h-screen justify-center">
       <div className="relative flex justify-center items-center w-full h-screen">
-      {activeDeviceId && startCamera ? (
+      {activeDeviceId ? (
           <Webcam
             height={size.height || 1000}
             width={size.width || 1000}
