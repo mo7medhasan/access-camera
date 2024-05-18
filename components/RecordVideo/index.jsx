@@ -37,7 +37,7 @@ export default function RecordVideo() {
   const timer = useRef(null);
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [devices, setDevices] = useState([]);
-  const [activeDeviceId, setActiveDeviceId] = useState();
+  const [activeDeviceId, setActiveDeviceId] = useState(null);
   const [urlImage, setUrlImage] = useState(null);
   const [file, setFile] = useState(null);
   const [urlVideo, setUrlVideo] = useState(null);
@@ -71,32 +71,27 @@ export default function RecordVideo() {
 
   useEffect(() => {
     if (devices.length) {
-      setActiveDeviceId(devices[0].deviceId);}
+      setActiveDeviceId(devices[0].deviceId);
+    }
   }, [devices]);
+
   useEffect(() => {
-    async function funStartCamera() {
+    async function startCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { deviceId: activeDeviceId },
           audio: true,
-        }); 
-       if(stream) { setStartCamera(true);
-        if (webcamRef.current&&startCamera) {
+        });
+
+        if (webcamRef.current) {
           webcamRef.current.srcObject = stream;
-        
-        }else{
-          funStartCamera()
-        }}else{
-          funStartCamera()
         }
+        setStartCamera(true);
       } catch (error) {
-        if(webcamRef.current&&activeDeviceId&&startCamera)funStartCamera()
-          else
         toast({
           title: "Error",
           id: "camera",
-          description: `Camera access not allowed
-        and you have error :  ${error}`,
+          description: `Camera access not allowed and you have error: ${error}`,
           variant: "destructive",
           swipeDirection: "center",
         });
@@ -104,14 +99,16 @@ export default function RecordVideo() {
       }
     }
 
-    funStartCamera();
+    if (activeDeviceId) {
+      startCamera();
+    }
 
     return () => {
       if (webcamRef.current && webcamRef.current.srcObject) {
         webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [activeDeviceId,webcamRef,devices]);
+  }, [activeDeviceId]);
 
   const handleDataAvailable = useCallback(
     ({ data }) => {
@@ -122,10 +119,11 @@ export default function RecordVideo() {
     [setRecordedChunks]
   );
 
-  const capturePhoto = React.useCallback(async () => {
+  const capturePhoto = React.useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     setUrlImage(imageSrc);
   }, [webcamRef]);
+
   const handleStartCaptureClick = useCallback(() => {
     setRecording(true);
     const interval = setInterval(() => {
@@ -139,6 +137,7 @@ export default function RecordVideo() {
     mediaRecorderRef.current.startRecording();
     mediaRecorderRef.current.ondataavailable = handleDataAvailable;
   }, [webcamRef, setRecording, mediaRecorderRef, handleDataAvailable]);
+
   const handlePauseRecording = useCallback(() => {
     if (recording) {
       mediaRecorderRef.current.pauseRecording();
@@ -148,6 +147,7 @@ export default function RecordVideo() {
       timer.current = null;
     }
   }, [recording, mediaRecorderRef]);
+
   const handlePlayAgainRecording = useCallback(() => {
     if (recording && !pause) return;
     setRecording(true);
@@ -160,6 +160,7 @@ export default function RecordVideo() {
     timer.current = interval;
     mediaRecorderRef.current.resumeRecording();
   }, [recording, pause, mediaRecorderRef]);
+
   const handleStopCaptureClick = useCallback(() => {
     setRunning((previousState) => !previousState);
     setRecording(false);
@@ -211,38 +212,7 @@ export default function RecordVideo() {
 
     setActiveDeviceId(nextDeviceId);
   };
-//  const switchCamera = useCallback(async () => {
-//     if (!devices.length) {
-//       alert("No cameras available");
-//       return;
-//     }
 
-//     // Check if more than one camera exists before attempting to switch
-//     if (devices.length > 1) {
-//       const index = devices.findIndex(
-//         (device) => device.deviceId === activeDeviceId
-//       );
-//       if (index < devices.length - 1) {
-//         setActiveDeviceId(devices[+index + 1].deviceId);
-//       } else {
-//         // If no other device found, cycle back to the first one
-//         setActiveDeviceId(devices[0].deviceId);
-//       }
-//     } else {
-//       // Inform user that camera switching is not possible
-//       console.warn("Camera switching is not possible with a single camera");
-//     }
-
-//     try {
-//       const stream = await navigator.mediaDevices.getUserMedia({
-//         video: { deviceId: activeDeviceId },
-//         audio: true,
-//       });
-//       webcamRef.current.srcObject = stream;
-//     } catch (error) {
-//       console.error("Error switching camera:", error);
-//     }
-//   }, [devices, activeDeviceId, webcamRef]);
   useEffect(() => {
     if (file) {
       setDownload(false);
@@ -250,29 +220,29 @@ export default function RecordVideo() {
         setUrlImage(URL.createObjectURL(file));
       else if (file.type?.startsWith("video")) {
         const url = URL.createObjectURL(file);
-
         setUrlVideo(url);
-      } else
+      } else {
         toast({
           title: "Wrong",
-          description: `this file not allow to upload `,
+          description: `this file not allow to upload`,
           variant: "destructive",
           swipeDirection: "center",
         });
+      }
     }
   }, [file]);
+
   useEffect(() => {
     if (isRunning && time > 60 * 3) {
       handleStopCaptureClick();
     }
   }, [handleStopCaptureClick, isRunning, time]);
-  // console.log("file", file);
+
   const size = useWindowSize();
-  const isLandscape = useMemo(()=> size.height <= size.width,[size.height,size.width])
- const ratio =  useMemo(() => isLandscape
-  ? size.width / size.height
-  : size.height / size.width, [isLandscape, size.height, size.width])
-  
+  const isLandscape = useMemo(() => size.height <= size.width, [size.height, size.width]);
+  const ratio = useMemo(() => isLandscape
+    ? size.width / size.height
+    : size.height / size.width, [isLandscape, size.height, size.width]);
 
   return (
     <div className="gap-10 flex flex-col w-full h-screen justify-center">
