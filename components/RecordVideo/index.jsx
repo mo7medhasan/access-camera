@@ -71,7 +71,7 @@ export default function RecordVideo() {
 
   useEffect(() => {
     if (devices.length) {
-      setActiveDeviceId(devices[devices.length-1].deviceId);
+      setActiveDeviceId(devices[0].deviceId);
     }
   }, [devices]);
 
@@ -202,6 +202,7 @@ export default function RecordVideo() {
 
   const switchCamera = async () => {
     setStartCamera(false);
+    setActiveDeviceId(null);
     if (!devices.length) {
       alert("No cameras available");
       return;
@@ -210,7 +211,7 @@ export default function RecordVideo() {
     const index = devices.findIndex((device) => device.deviceId === activeDeviceId);
     const nextDeviceId = index < devices.length - 1 ? devices[index + 1].deviceId : devices[0].deviceId;
 
-    setActiveDeviceId(nextDeviceId);
+    nextDeviceId&& setActiveDeviceId(nextDeviceId);
   };
 
   useEffect(() => {
