@@ -108,7 +108,7 @@ export default function RecordVideo() {
         webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [activeDeviceId]);
+  }, [activeDeviceId,webcamRef]);
 
   const handleDataAvailable = useCallback(
     ({ data }) => {
