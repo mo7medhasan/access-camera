@@ -10,11 +10,10 @@ const icons = {
   Twitter: Twitter,
   Snapchat: SnapchatIcon,
   WhatsApp: WhatsAppIcon,
-  Email: MailOutline,
-  SMS: Sms,
+ 
 };
 
-const SocialLink = ({ social, isActive, position, ...rest }) => {
+const SocialLink = ({ social, isActive, position,id,handleSharePost, ...rest }) => {
   const Icon = icons[social?.outlet];
   const animationClasses = `
     transition duration-200 ${isActive ? "ease-in-out" : ""}`;
@@ -25,6 +24,7 @@ const SocialLink = ({ social, isActive, position, ...rest }) => {
   return (
     <Link 
       href={social.href}
+      onClick={()=>handleSharePost(id,social.outlet)}
       {...rest}
       style={{
         right: isActive ? `60px` : "0px",

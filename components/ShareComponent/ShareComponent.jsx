@@ -4,7 +4,7 @@ import ShareButton from './ShareButton';
 import SocialLink from './SocialLink';
 
 // "https://api.whatsapp.com/send?text=GitHub%3A%3A%20http%3A%2F%2Fgithub.com"
-export default function ShareComponent({url,title}) {
+export default function ShareComponent({url,title,totalComments,id,handleSharePost}) {
    const socials = [
   {
     outlet: "LinkedIn",
@@ -60,6 +60,8 @@ const [menuActive, setMenuActive] = useState(false);
 
   const socialLinks = socials.map((social, index) => (
     <SocialLink
+    handleSharePost={handleSharePost}
+    id={id}
       key={index}
       social={social}
       isActive={menuActive}
@@ -68,12 +70,13 @@ const [menuActive, setMenuActive] = useState(false);
   ));
 
   return (
-    <div className=" w-12 h-12 rounded-full backdrop-blur-3xl bg-black/30 flex justify-center items-center">
+    <div className=" w-12 h-12 gap-px flex-col rounded-full backdrop-blur-3xl bg-black/30 flex justify-center items-center">
   
       <div className=" flex items-center justify-center">
         <ShareButton isActive={menuActive} onClick={handleToggleMenu} />
       {socialLinks}
       </div>
+      <span className="text-xs text-white" > {totalComments}</span>
     </div>
   );
 }

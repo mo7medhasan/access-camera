@@ -1,7 +1,10 @@
 
 const padToTwo = (number) => (number <= 9 ? `0${number}` : number);
 
-export const displayTime = (centiseconds) => {
+export const displayTime = (time) => {
+  let centiseconds =time.toFixed(0)
+
+  
   let minutes = 0;
   let seconds = 0;
 

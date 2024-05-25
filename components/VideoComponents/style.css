@@ -9,7 +9,7 @@
    .playerBtns{
     position: absolute;
     bottom: 2%;display: flex;
-    z-index: 999;
+    z-index: 99;
     left: 0;
     right: 0;
     /* padding: 0.2rem; */

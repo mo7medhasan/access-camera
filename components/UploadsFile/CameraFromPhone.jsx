@@ -1,14 +1,16 @@
-import { Upload } from "lucide-react";
+
+import { Camera, Upload, Video } from "lucide-react";
 import { useRef } from "react";
 
-export default function UploadsFile({ onChange, image }){
+export default function CameraFromPhone({ onChange, type,setDownload }){
 
 
     const imageRef = useRef(null);
    
     const HandleUpload = (e) => {
+
       const file = e.target.files[0];
-   
+   setDownload(true)
       onChange(file)
     };
   
@@ -24,10 +26,12 @@ export default function UploadsFile({ onChange, image }){
           type="file"
           multiple={false}
           ref={imageRef}
-          accept="image/*,video/*"
+      
+          name={type=="video"?'video':"picture"} accept={type=="video"?"video/*":"image/*"} capture="environment" 
           onChange={HandleUpload}
         />
-        <Upload />
+         {type=="video"? <Video />:
+<Camera /> }
       </button>
     );
  

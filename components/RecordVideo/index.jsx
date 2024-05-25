@@ -1,12 +1,5 @@
 "use client";
-import React, {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import RecordRTC from "recordrtc";
 import VideoPlayer from "../VideoComponents/VideoPlayer";
@@ -18,131 +11,110 @@ import {
   CircleStop,
   Disc,
   OctagonPause,
+  SendHorizontal,
   SwitchCamera,
   Video,
+  X,
 } from "lucide-react";
-import { useToast } from "../ui/use-toast";
-import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 
-export default function RecordVideo() {
-  const { toast } = useToast();
+import toast from "react-hot-toast";
+import { uploadingAssets } from "@/utils/uploadImage";
+import { operationsServer } from "@/utils/apiUtilies";
+import { useRouter } from "next/navigation";
+
+export default function RecordVideo({ competition, brand }) {
+  const router = useRouter();
   const webcamRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const timer = useRef(null);
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [devices, setDevices] = useState([]);
-  const [activeDeviceId, setActiveDeviceId] = useState(null);
+  const [activeDeviceId, setActiveDeviceId] = useState();
   const [urlImage, setUrlImage] = useState(null);
   const [file, setFile] = useState(null);
   const [urlVideo, setUrlVideo] = useState(null);
   const [time, setTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
-  const [startCamera, setStartCamera] = useState(false);
   const [recording, setRecording] = useState(false);
   const [isRunning, setRunning] = useState(false);
   const [isDownload, setDownload] = useState(true);
   const [pause, setPause] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleDevices = useCallback(
+  const uploadPostToBackend = async (tempPayload) => {
+    try {
+      let res = await operationsServer({
+        endpoint: `/reviews`,
+        payload: {
+          method: `POST`,
+          data: tempPayload,
+        },
+        revalidation: {
+          tags: ["posts"],
+        },
+      });
+
+      if (res?.status === "error") {
+        setIsLoading(false);
+
+        toast.error(res?.error_en, {
+          position: "top-center",
+        });
+      } else {
+        setIsLoading(false);
+
+        toast.success(res?.success_en, {
+          position: "top-center",
+        });
+        router.replace("/");
+      }
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("An error occurred while submitting the review.", {
+        position: "top-center",
+      });
+    }
+  };
+
+  const UploadPost = async (file, type) => {
+    setIsLoading(true);
+    let tempPayload = { competition, brand };
+
+    if (file) {
+      try {
+        const url = await uploadingAssets(`/upload/file`, file, type);
+        tempPayload.content = url?.fileUrl;
+        tempPayload.contentType = type;
+
+        await uploadPostToBackend(tempPayload);
+      } catch (error) {
+        toast.error("An error occurred while uploading the file.", {
+          position: "top-center",
+        });
+      }
+    } else {
+      // Handle case where there is no file, if needed
+      toast.error("No file provided for upload.", {
+        position: "top-center",
+      });
+    }
+  };
+
+  const handleDevices = React.useCallback(
     (mediaDevices) => {
       setDevices(mediaDevices.filter(({ kind }) => kind === "videoinput"));
     },
+
     [setDevices]
   );
 
-  useEffect(() => {
-    async function fetchDevices() {
-      try {
-        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-        handleDevices(mediaDevices);
-      } catch (error) {
-        console.error("Error fetching devices:", error);
-      }
-    }
-
-    fetchDevices();
+  React.useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(handleDevices);
   }, [handleDevices]);
 
-  useEffect(() => {
-    if (devices.length) {
-      setActiveDeviceId(devices[0].deviceId);
-    }
+  React.useEffect(() => {
+    if (devices.length) setActiveDeviceId(devices[0].deviceId);
   }, [devices]);
-
-  useEffect(() => {
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: activeDeviceId },
-          audio: true,
-        });
-
-        if (webcamRef.current) {
-          webcamRef.current.srcObject = stream;
-        }
-        setStartCamera(true);
-      } catch (error) {
-        toast({
-          title: "Error",
-          id: "camera",
-          description: `Camera access not allowed and you have error: ${error}`,
-          variant: "destructive",
-          swipeDirection: "center",
-        });
-        setStartCamera(false);
-      }
-    }
-
-    if (activeDeviceId) {
-      startCamera();
-    }
-
-    return () => {
-      if (webcamRef.current && webcamRef.current.srcObject) {
-        webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [activeDeviceId,webcamRef]);
-  useEffect(() => {
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: activeDeviceId },
-          audio: true,
-        });
-
-        if (webcamRef.current) {
-          webcamRef.current.srcObject = stream;
-        }
-        setStartCamera(true);
-      } catch (error) {
-        toast({
-          title: "Error",
-          id: "camera",
-          description: `Camera access not allowed and you have error: ${error}`,
-          variant: "destructive",
-          swipeDirection: "center",
-        });
-        setStartCamera(false);
-      }
-    }
-
- 
-      startCamera()
-    
-
-    return () => {
-      if (webcamRef.current && webcamRef.current.srcObject) {
-        webcamRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, []);
   const handleDataAvailable = useCallback(
     ({ data }) => {
       if (data.size > 0) {
@@ -152,11 +124,20 @@ export default function RecordVideo() {
     [setRecordedChunks]
   );
 
-  const capturePhoto = React.useCallback(() => {
+  const capturePhoto = React.useCallback(async () => {
     const imageSrc = webcamRef.current.getScreenshot();
-    setUrlImage(imageSrc);
-  }, [webcamRef]);
 
+    setUrlImage(imageSrc);
+    fetch(imageSrc)
+      .then((res) => res.blob())
+      .then((blob) => {
+        // Create a new File object
+        const file = new File([blob], `photo-${Date.now()}.png`, {
+          type: "image/png",
+        });
+        setFile(file);
+      });
+  }, [webcamRef]);
   const handleStartCaptureClick = useCallback(() => {
     setRecording(true);
     const interval = setInterval(() => {
@@ -170,7 +151,6 @@ export default function RecordVideo() {
     mediaRecorderRef.current.startRecording();
     mediaRecorderRef.current.ondataavailable = handleDataAvailable;
   }, [webcamRef, setRecording, mediaRecorderRef, handleDataAvailable]);
-
   const handlePauseRecording = useCallback(() => {
     if (recording) {
       mediaRecorderRef.current.pauseRecording();
@@ -180,7 +160,6 @@ export default function RecordVideo() {
       timer.current = null;
     }
   }, [recording, mediaRecorderRef]);
-
   const handlePlayAgainRecording = useCallback(() => {
     if (recording && !pause) return;
     setRecording(true);
@@ -193,7 +172,6 @@ export default function RecordVideo() {
     timer.current = interval;
     mediaRecorderRef.current.resumeRecording();
   }, [recording, pause, mediaRecorderRef]);
-
   const handleStopCaptureClick = useCallback(() => {
     setRunning((previousState) => !previousState);
     setRecording(false);
@@ -204,6 +182,10 @@ export default function RecordVideo() {
 
       const url = URL.createObjectURL(blob);
       setUrlVideo(url);
+      const file = new File([blob], `video-${Date.now()}.mp4`, {
+        type: "video/mp4",
+      });
+      setFile(file);
     });
 
     setEndTime(time);
@@ -219,13 +201,9 @@ export default function RecordVideo() {
         document.body.appendChild(a);
         a.style = "display:none";
         a.href = urlDownload;
-
-        urlImage
-          ? (a.download = `image-${Math.ceil(Math.random() * 100)}-A.png`)
-          : urlVideo
-          ? (a.download = `video-${Math.ceil(Math.random() * 100)}-A.mp4`)
-          : null;
-
+        a.download = urlImage
+          ? `image-${Math.ceil(Math.random() * 100)}-A.png`
+          : `video-${Math.ceil(Math.random() * 100)}-A.mp4`;
         a.click();
         URL.revokeObjectURL(urlDownload);
       }
@@ -234,218 +212,197 @@ export default function RecordVideo() {
   );
 
   const switchCamera = async () => {
-    setStartCamera(false);
-    setActiveDeviceId(null);
     if (!devices.length) {
       alert("No cameras available");
       return;
     }
 
-    const index = devices.findIndex((device) => device.deviceId === activeDeviceId);
-    const nextDeviceId = index < devices.length - 1 ? devices[index + 1].deviceId : devices[0].deviceId;
-
-    nextDeviceId&& setActiveDeviceId(nextDeviceId);
+    const index = devices.findIndex(
+      (device) => device.deviceId == activeDeviceId
+    );
+    if (index < devices.length - 1) {
+      setActiveDeviceId(devices[+index + 1].deviceId);
+    } else {
+      // If no other device found, cycle back to the first one
+      setActiveDeviceId(devices[0].deviceId);
+    }
   };
-
   useEffect(() => {
     if (file) {
       setDownload(false);
-      if (file.type?.startsWith("image"))
-        setUrlImage(URL.createObjectURL(file));
-      else if (file.type?.startsWith("video")) {
-        const url = URL.createObjectURL(file);
-        setUrlVideo(url);
-      } else {
-        toast({
-          title: "Wrong",
-          description: `this file not allow to upload`,
-          variant: "destructive",
-          swipeDirection: "center",
-        });
+      const url = URL.createObjectURL(file);
+      if (file.type.startsWith("image")) setUrlImage(url);
+      else if (file.type.startsWith("video")) setUrlVideo(url);
+      else {
+        toast.error("This file is not allowed to upload");
       }
     }
   }, [file]);
-
   useEffect(() => {
     if (isRunning && time > 60 * 3) {
       handleStopCaptureClick();
     }
   }, [handleStopCaptureClick, isRunning, time]);
-
+  // console.log("file", file);
   const size = useWindowSize();
-  const isLandscape = useMemo(() => size.height <= size.width, [size.height, size.width]);
-  const ratio = useMemo(() => isLandscape
+  const isLandscape = size.height <= size.width;
+  const ratio = isLandscape
     ? size.width / size.height
-    : size.height / size.width, [isLandscape, size.height, size.width]);
-
+    : size.height / size.width;
   return (
-    <div className="gap-10 flex flex-col w-full h-screen justify-center">
-      <div className="relative flex justify-center items-center w-full h-screen">
-      {activeDeviceId ? (
+    <div className="gap-10 flex flex-col justify-center">
+      <div className="flex justify-between flex-wrap">
+        <div className="relative flex justify-center items-center w-full h-screen">
           <Webcam
-            height={size.height || 1000}
-            width={size.width || 1000}
+            height={size.height}
+            width={size.width}
             muted={true}
             audio={true}
-            mirrored={false}
+            mirrored={true}
             ref={webcamRef}
+            audioConstraints={{
+              deviceId: "default",
+            }}
             videoConstraints={{ deviceId: activeDeviceId, aspectRatio: ratio }}
           />
-        ) : null}
-        {time ? (
-          <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
-            {displayTime(time)}
-          </div>
-        ) : null}
-        <div className="absolute top-[20%] right-6 ">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="backdrop-blur-lg  p-5 flex justify-center items-center  bg-black/30 rounded-full ">
-              {" "}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {devices.map((device) => (
-                <DropdownMenuItem
-                  key={device.deviceId}
-                  onClick={() => setActiveDeviceId(device.deviceId)}
-                >
-                  {device.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        {urlImage || urlVideo ? (
-          <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-50">
-            {urlImage ? (
-              <div className="relative rounded-2xl overflow-hidden aspect-[0.55] h-screen  bg-black  ">
-                <Image
-                  src={urlImage}
-                  fill
-                  sizes="50vw"
-                  alt="Screenshot"
-                  className="w-full h-full object-contain object-center aspect-[0.55]"
-                />
-                <button
-                  className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
-                  onClick={() => {
-                    setUrlImage(null);
-                  }}
-                >
-                  X
-                </button>
-                {urlImage && isDownload ? (
-                  <button
-                    className="  absolute  bottom-10 left-10 bg-white p-5  flex justify-center items-center rounded-full"
-                    onClick={() => handleDownload(urlImage)}
-                  >
-                    <ArrowDownToLine />
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-
-            {urlVideo ? (
-              <div className="relative aspect-[0.5] ] h-full max-h-screen  max-w-full">
-                <Suspense fallback={<p>Loading video...</p>}>
-                  {" "}
-                  <VideoPlayer src={urlVideo} autoPlay endTime={endTime} />
-                </Suspense>
-                <button
-                  className="absolute p-2 top-5 right-2 bg-red-600 text-black rounded-full"
-                  onClick={() => {
-                    setUrlVideo(null);
-                    setRecordedChunks([]);
-                  }}
-                >
-                  X
-                </button>
-                {urlVideo && isDownload ? (
-                  <button
-                    className="  absolute  bottom-10 left-10 bg-white p-5 m-5 flex justify-center items-center rounded-full"
-                    onClick={() => handleDownload(urlVideo)}
-                  >
-                    <ArrowDownToLine />
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-        <div className="absolute bottom-0 z-50  inset-x-0 bg-black/20 sm:py-5 py-3  flex justify-center items-center flex-wrap sm:gap-5 gap-2">
-          {!recording && !pause ? (
-            <>
-              <UploadsFile onChange={setFile} />
-              <button
-                className="bg-white p-5  flex justify-center items-center rounded-full"
-                onClick={handleStartCaptureClick}
-              >
-                <Video />
-              </button>
-              <button
-                className="bg-white p-5  flex justify-center items-center rounded-full"
-                onClick={capturePhoto}
-              >
-                <Camera />
-              </button>
-              <button
-                className="bg-white p-5  flex justify-center items-center rounded-full"
-                onClick={switchCamera}
-              >
-                <SwitchCamera />
-              </button>
-            </>
+          {time ? (
+            <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2  backdrop-blur-lg animate-pulse p-5 flex justify-center items-center  bg-black/30 text-red-500 rounded-full ">
+              {displayTime(time)}
+            </div>
           ) : null}
-          {recording || pause ? (
-            <div className="flex items-center  gap-4  h-auto py-2 px-4 rounded-full bg-black/20 ">
-              {recording || pause ? (
-                <>
+
+          {urlImage || urlVideo ? (
+            <div className=" flex  items-center  justify-center backdrop-blur-xl absolute inset-0 bg-white/50 z-20">
+              {urlImage ? (
+                <div className="relative rounded-2xl overflow-hidden aspect-[0.55] h-screen  bg-black  ">
+                  <img
+                    src={urlImage}
+                    alt="Screenshot"
+                    className="w-full h-full object-contain object-center aspect-[0.55]"
+                  />
                   <button
-                    className="bg-white  p-5   flex justify-center items-center rounded-full"
-                    onClick={handleStopCaptureClick}
+                    className="absolute p-2 flex justify-center items-center  top-5 right-2 bg-red-600  rounded-full"
+                    onClick={() => {
+                      setUrlImage(null);
+                    }}
                   >
-                    <CircleStop />
+                    <X color="white" strokeWidth={3} />
                   </button>
-                </>
+                  {urlImage && isDownload ? (
+                    <button
+                      className="  absolute  bottom-10 left-10 bg-white p-5  flex justify-center items-center rounded-full"
+                      onClick={() => handleDownload(urlImage)}
+                    >
+                      <ArrowDownToLine />
+                    </button>
+                  ) : null}
+                  {file ? (
+                    <button
+                      className="  absolute  bottom-10 right-10 bg-white p-5  flex justify-center items-center rounded-full"
+                      onClick={() =>
+                        UploadPost(file, file?.type?.split("/")?.[0])
+                      }
+                    >
+                      <SendHorizontal />
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
-              {recording && !pause ? (
-                <>
+
+              {urlVideo ? (
+                <div className="relative aspect-[0.5] ] h-full max-h-screen  max-w-full">
+                  <VideoPlayer src={urlVideo} autoPlay endTime={endTime} />
                   <button
-                    className="bg-white p-5  flex justify-center items-center rounded-full"
-                    onClick={handlePauseRecording}
+                    className="absolute  p-2  flex justify-center items-center top-5 right-2 bg-red-600 text-black rounded-full"
+                    onClick={() => {
+                      setUrlVideo(null);
+                      setRecordedChunks([]);
+                    }}
                   >
-                    <OctagonPause />
+                    <X color="white" strokeWidth={3} />
                   </button>
-                </>
-              ) : null}
-              {!recording && pause ? (
-                <button
-                  className="bg-white  p-5   flex justify-center items-center rounded-full"
-                  onClick={handlePlayAgainRecording}
-                >
-                  <Disc />
-                </button>
+                  {urlVideo && isDownload ? (
+                    <button
+                      className="  absolute  bottom-10 left-10 bg-white p-5 m-5 flex justify-center items-center rounded-full"
+                      onClick={() => handleDownload(urlVideo)}
+                    >
+                      <ArrowDownToLine />
+                    </button>
+                  ) : null}
+
+                  {file ? (
+                    <button
+                      className="  absolute  bottom-10 right-10 bg-white p-5  flex justify-center items-center rounded-full"
+                      onClick={() =>
+                        UploadPost(file, file?.type?.split("/")?.[0])
+                      }
+                    >
+                      <SendHorizontal />
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           ) : null}
+          <div className="absolute bottom-0 inset-x-0 bg-black/20 sm:py-5 py-3  flex justify-center items-center flex-wrap sm:gap-5 gap-2">
+            {!recording && !pause ? (
+              <>
+                <UploadsFile onChange={setFile} />
+                <button
+                  className="bg-white p-5  flex justify-center items-center rounded-full"
+                  onClick={handleStartCaptureClick}
+                >
+                  <Video />
+                </button>
+                <button
+                  className="bg-white p-5  flex justify-center items-center rounded-full"
+                  onClick={capturePhoto}
+                >
+                  <Camera />
+                </button>
+                <button
+                  className="bg-white p-5  flex justify-center items-center rounded-full"
+                  onClick={switchCamera}
+                >
+                  <SwitchCamera />
+                </button>
+              </>
+            ) : null}
+            {recording || pause ? (
+              <div className="flex items-center  gap-4  h-auto py-2 px-4 rounded-full bg-black/20 ">
+                {recording || pause ? (
+                  <>
+                    <button
+                      className="bg-white  p-5   flex justify-center items-center rounded-full"
+                      onClick={handleStopCaptureClick}
+                    >
+                      <CircleStop />
+                    </button>
+                  </>
+                ) : null}
+                {recording && !pause ? (
+                  <>
+                    <button
+                      className="bg-white p-5  flex justify-center items-center rounded-full"
+                      onClick={handlePauseRecording}
+                    >
+                      <OctagonPause />
+                    </button>
+                  </>
+                ) : null}
+                {!recording && pause ? (
+                  <button
+                    className="bg-white  p-5   flex justify-center items-center rounded-full"
+                    onClick={handlePlayAgainRecording}
+                  >
+                    <Disc />
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
-      {startCamera?null:
-      <div className="absolute  flex h-screen w-screen bg-white items-center justify-center text-center text-blue-700  animate-pulse  text-xl font-semibold">
-        Loading Camera...
-      </div>
-      }
     </div>
   );
 }
@@ -482,6 +439,7 @@ function useWindowSize() {
   return windowSize;
 }
 // const uploadImage = async (imageData) => {
+
 //   try {
 //       const formData = new FormData();
 //       formData.append('image', imageData);
@@ -504,7 +462,27 @@ function useWindowSize() {
 //       console.error('Error:', error);
 //   } finally {
 //       // Optionally, clear captured image data after upload
-//       setImageData(null);
+//       // setImageData(null);
+//   }
+// };
+
+// const handleLikePost = async (id) => {
+//   if (id !== "") {
+//     await operationsServer({
+//       endpoint: `/reviews/like/${id}`,
+//       payload: {
+//         method: "PUT",
+//       },
+//       revalidation: {
+//         tags: ["like"],
+//       },
+//     })
+//       .then((res) => {
+//         toast.success(res.success_en);
+//       })
+//       .catch((err) => {
+//         toast.success(err.error_en);
+//       });
 //   }
 // };
 
@@ -523,5 +501,41 @@ function useWindowSize() {
 //     // Handle successful upload (e.g., clear video)
 //   } else {
 //     console.error('Error uploading video!');
+//   }
+// };
+
+// const uploadImage = async(data)=> {
+//   const formData = new FormData();
+//   formData.append('file', imageData);
+
+//   try {
+//     const response = await axios.post(`${baseUrl}/upload/file`, formData, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data',
+//       },
+//     });
+//     if(response?.data?.fileUrl!=undefined&&response?.data?.fileUrl!=null){
+//       trigger({
+//       "competition": contestId,
+//       "brand": brandId,
+//       "content": response?.data?.fileUrl
+//     }).then((res)=>{
+//         if(res?.data?.status=='success'){
+//           getAlbums()
+//         }else{
+//           if(res.error){
+//             setErrorMessage((language
+//               ? res.error?.data?.error_ar
+//               : res.error?.data?.error_en) ||
+//               (language
+//                 ? "حصل خطأ. الرجاء المحاوله مرة اخرى"
+//                 : "An error has occured please try again later"))
+//           }
+//         }
+//       })
+
+//     }
+//   } catch (error) {
+//     console.error('Error uploading image:', error);
 //   }
 // };

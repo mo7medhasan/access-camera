@@ -8,7 +8,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import CustomVideoPlayer from ".";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button } from "../ui/button";
 export default function ModalVideo({
   src,
   autoPlay = false,
@@ -24,16 +25,29 @@ export default function ModalVideo({
       <DialogPortal className="!bg-transparent relative">
         <DialogOverlay className="backdrop-blur-xl !bg-white/30 !cursor-pointer " />
    
-        <DialogContent className="!w-auto   !bg-none grid content-center justify-center border-none h-full max-w-fit  !p-0">
+        <DialogContent className="sm:!w-auto !w-screen   !bg-none grid content-center justify-center border-none h-full sm:max-w-fit  !p-0">
        
           <div className="n">
             <CustomVideoPlayer src={src} showPopup={false} />
           </div>
-        </DialogContent><DialogClose
-            asChild
-            className="fixed  !cursor-pointer top-20 text-black left-28 z-50"
-          ><div className="!cursor-pointer z-50">
-            <ArrowLeft size={100} color="black" className="!cursor-pointer z-50" /></div>
+          <DialogClose
+            
+            className="fixed md:hidden block  !cursor-pointer top-[5%] text-black right-[5%] z-[99999999999]"
+          > 
+          <div> <Button type="button" variant="ghost" className="!cursor-pointer ">
+           <ArrowRight size={48} color="black" className="!cursor-pointer  " />
+            </Button></div>
+          
+          </DialogClose>
+        </DialogContent>
+        <DialogClose
+            
+            className="fixed hidden md:block  !cursor-pointer top-[5%] text-black left-[5%] z-[99999999999]"
+          > 
+          <div>
+           <ArrowLeft size={48} color="black" className="!cursor-pointer  " />
+            </div>
+          
           </DialogClose>
       </DialogPortal>
     </Dialog>
