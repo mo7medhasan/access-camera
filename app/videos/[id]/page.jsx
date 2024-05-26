@@ -1,7 +1,7 @@
 
 import BtnBack from "@/components/VideoComponents/BtnBack";
 import VideoContainer from "@/components/VideoComponents/VideoContainer";
-import { getOperation } from "@/utils/apiUtilies";
+import { getOperation } from "";
 
 export default async function VideosPage({
   params: { id:VideoID },

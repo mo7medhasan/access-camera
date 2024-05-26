@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Trash2 } from "lucide-react";
-import { getOperation } from "@/utils/apiUtilies";
+// import { getOperation } from "@/utils/apiUtilies";
 import toast from "react-hot-toast";
 
 export default function ModalComment({
@@ -19,44 +19,44 @@ export default function ModalComment({
   const comment = useRef(null);
   const cancelButtonRef = useRef(null);
 
-  useEffect(() => {
-    if (open && id) {
-      (async (id) => {
-        try {
-          const res = await getOperation(
-            `/comments/review/${id}?populate=user`,
-            {
-              method: "GET",
-              next: {
-                revalidate: 1,
-                tags: ["posts"],
-              },
-            }
-          );
-          if (res?.status === "error") {
-            setData([]);
-          } else {
-            setData(res?.data);
-          }
-          console.log("res", res);
-        } catch (err) {
-          console.error(err);
-        }
-      })(id);
-    }
-  }, [id, open]);
+  // useEffect(() => {
+  //   if (open && id) {
+  //     (async (id) => {
+  //       try {
+  //         const res = await getOperation(
+  //           `/comments/review/${id}?populate=user`,
+  //           {
+  //             method: "GET",
+  //             next: {
+  //               revalidate: 1,
+  //               tags: ["posts"],
+  //             },
+  //           }
+  //         );
+  //         if (res?.status === "error") {
+  //           setData([]);
+  //         } else {
+  //           setData(res?.data);
+  //         }
+  //         console.log("res", res);
+  //       } catch (err) {
+  //         console.error(err);
+  //       }
+  //     })(id);
+  //   }
+  // }, [id, open]);
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    const commentData = comment.current.value.trim();
+  // const onSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const commentData = comment.current.value.trim();
 
-    if (commentData.length <= 3) {
-      toast.error("Comment must be at least 3 characters");
-      return;
-    }
-    handleCommentPost(id, commentData, setData);
-    comment.current.value = "";
-  };
+  //   if (commentData.length <= 3) {
+  //     toast.error("Comment must be at least 3 characters");
+  //     return;
+  //   }
+  //   handleCommentPost(id, commentData, setData);
+  //   comment.current.value = "";
+  // };
 
   return (
     <>
