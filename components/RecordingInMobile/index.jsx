@@ -1,9 +1,9 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import { operationsServer } from "@/utils/apiUtilies";
+// import { operationsServer } from "@/utils/apiUtilies";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { uploadingAssets } from "@/utils/uploadImage";
+// import { uploadingAssets } from "@/utils/uploadImage";
 import CameraFromPhone from "../UploadsFile/CameraFromPhone";
 import { ArrowDownToLine, SendHorizontal, X } from "lucide-react";
 import VideoPlayer from "../VideoComponents/VideoPlayer";
@@ -17,62 +17,62 @@ export default function RecordingInMobile({competition, brand}) {
   const [isDownload, setDownload] = useState(true);
 
   const uploadPostToBackend = async (tempPayload) => {
-    try {
-      let res = await operationsServer({
-        endpoint: `/reviews`,
-        payload: {
-          method: `POST`,
-          data: tempPayload,
-        },
-        revalidation: {
-          tags: ["posts"],
-        },
-      });
+    // try {
+    //   let res = await operationsServer({
+    //     endpoint: `/reviews`,
+    //     payload: {
+    //       method: `POST`,
+    //       data: tempPayload,
+    //     },
+    //     revalidation: {
+    //       tags: ["posts"],
+    //     },
+    //   });
 
-      if (res?.status === "error") {
-        setIsLoading(false);
+    //   if (res?.status === "error") {
+    //     setIsLoading(false);
 
-        toast.error(res?.error_en, {
-          position: "top-center",
-        });
-      } else {
-        setIsLoading(false);
+    //     toast.error(res?.error_en, {
+    //       position: "top-center",
+    //     });
+    //   } else {
+    //     setIsLoading(false);
 
-        toast.success(res?.success_en, {
-          position: "top-center",
-        });
-        router.replace("/");
-      }
-    } catch (error) {
-      setIsLoading(false);
-      toast.error("An error occurred while submitting the review.", {
-        position: "top-center",
-      });
-    }
+    //     toast.success(res?.success_en, {
+    //       position: "top-center",
+    //     });
+    //     router.replace("/");
+    //   }
+    // } catch (error) {
+    //   setIsLoading(false);
+    //   toast.error("An error occurred while submitting the review.", {
+    //     position: "top-center",
+    //   });
+    // }
   };
 
   const UploadPost = async (file, type) => {
     setIsLoading(true);
     let tempPayload = { competition, brand };
 
-    if (file) {
-      try {
-        const url = await uploadingAssets(`/upload/file`, file, type);
-        tempPayload.content = url?.fileUrl;
-        tempPayload.contentType = type;
+    // if (file) {
+    //   try {
+    //     const url = await uploadingAssets(`/upload/file`, file, type);
+    //     tempPayload.content = url?.fileUrl;
+    //     tempPayload.contentType = type;
 
-        await uploadPostToBackend(tempPayload);
-      } catch (error) {
-        toast.error("An error occurred while uploading the file.", {
-          position: "top-center",
-        });
-      }
-    } else {
-      // Handle case where there is no file, if needed
-      toast.error("No file provided for upload.", {
-        position: "top-center",
-      });
-    }
+    //     await uploadPostToBackend(tempPayload);
+    //   } catch (error) {
+    //     toast.error("An error occurred while uploading the file.", {
+    //       position: "top-center",
+    //     });
+    //   }
+    // } else {
+    //   // Handle case where there is no file, if needed
+    //   toast.error("No file provided for upload.", {
+    //     position: "top-center",
+    //   });
+    // }
   };
 
   useEffect(() => {

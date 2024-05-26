@@ -6,7 +6,7 @@ import ShareComponent from "../ShareComponent/ShareComponent";
 
 import Link from "next/link";
 import { StarIcon } from "./Icons";
-import { imageBaseUrl } from "@/helpers/baseUrl";
+// import { imageBaseUrl } from "@/helpers/baseUrl";
 
 export default function CustomVideoPlayer({
   UserName,
@@ -16,23 +16,22 @@ export default function CustomVideoPlayer({
   muted,
   index,
   page,
-  ImageBrand,
+  // ImageBrand,
   Loop,
   showPopup = true,
-  postsData,
-  setOpenModal,
-  setId,
-  actions,
+  // postsData,
+  // setOpenModal,
+  // setId,
+  
   ...props
 }) {
-console.log("postsData",postsData)
 
   let url = `https://dev.to/dsasse07/beginner-s-guide-to-jest-testing-in-react-1nig`;
-  let title = postsData?.competition?.name_en;
-  const handleOpenModal = (id) => {
-    setOpenModal(true);
-    setId(id);
-  };
+  let title = "postsData?.competition?.name_en";
+  // const handleOpenModal = (id) => {
+  //   setOpenModal(true);
+  //   setId(id);
+  // };
   return (
     <div
       className="relative w-full rounded-2xl h-full max-w-[30rem] !aspect-[0.55] min-h-[70vh]  max-h-[80vh]"
@@ -46,7 +45,7 @@ console.log("postsData",postsData)
             muted={muted}
             Loop={Loop}
             index={index}
-            id={postsData?._id}
+            id={4564}
             {...props}
           />
         </Suspense>
@@ -63,7 +62,7 @@ console.log("postsData",postsData)
         </div>
       )}
       <Image
-        src={imageBaseUrl + "/" + postsData?.brand?.image}
+        src={"/default.png"}
         className="absolute  rounded-full top-7 left-7   z-30 shadow-sm shadow-black"
         height={64}
         width={64}
@@ -72,12 +71,12 @@ console.log("postsData",postsData)
   
       <div className="absolute bottom-[10%] z-5 inset-x-0 text-sm rounded-2xl backdrop-blur-sm flex flex-col gap-1 bg-black/5 p-1 text-white  pr-[20%] px-6">
       
-      <span className="font-medium">{postsData?.user?.name}</span>
-      <p className="font-light truncate	">{postsData?.competition?.description_en}</p>
+      <span className="font-medium">{"postsData?.user?.nam"}</span>
+      <p className="font-light truncate	">{"postsData?.competition?.description_en"}</p>
       </div>
       <div className="absolute z-30 right-2 bottom-[10%]  text-white flex flex-col gap-6">
         <Link
-          href={`/winners/${postsData?.competition?._id}`}
+          href={`/winners/${"postsData?.competition?._id"}`}
           className=" w-12 h-12 gap-px flex-col  rounded-full backdrop-blur-3xl bg-black/30 flex justify-center items-center"
         >
           <Image
@@ -91,22 +90,21 @@ console.log("postsData",postsData)
         </Link>
 
         <button
-          onClick={() => actions?.handleLikePost(postsData?._id)}
+          onClick={() => {}}
           className=" w-12 h-12 gap-px flex-col rounded-full backdrop-blur-3xl bg-black/30 flex justify-center items-center"
         >
-          {postsData?.liked ? (
+          {true? (
             <StarIcon className="fill-mainYellow w-4 h-4 mx-auto" />
           ) : (
             <StarIcon className="fill-white w-4 h-4 mx-auto" />
           )}
           <span className="text-xs text-white ">
        
-            {postsData?.totalLikes ? postsData?.totalLikes : null}
           </span>
         </button>
 
         <button
-          onClick={() => handleOpenModal(postsData?._id)}
+          onClick={() => {}}
           className=" w-12 h-12 gap-px flex-col  rounded-full backdrop-blur-3xl bg-black/30 flex justify-center items-center"
         >
           <Image
@@ -120,20 +118,17 @@ console.log("postsData",postsData)
 
           <span className="text-xs text-white">
             {" "}
-            {postsData?.totalComments ? postsData?.totalComments : null}
           </span>
         </button>
         <ShareComponent
           url={url}
           title={title}
-          id={postsData?._id}
-          totalComments={
-            postsData?.totalComments ? postsData?.totalComments : null
-          }
-          handleSharePost={actions?.handleSharePost}
+          id={212}
+          totalComments={2 }
+          handleSharePost={()=>{}}
         />
         <button
-          onClick={() => actions?.handleReportPost(postsData?._id)}
+          onClick={() =>{}}
           className=" w-12 h-12 gap-px flex-col rounded-full backdrop-blur-3xl bg-black/30 flex justify-center items-center"
         >
           <Image
@@ -143,8 +138,7 @@ console.log("postsData",postsData)
             height={80}
             className="w-4 h-4 mx-auto"
           />
-          <span className="text-xs text-white">
-            {postsData?.totalReports ? postsData?.totalReports : null}
+          <span className="text-xs text-white">]
           </span>
         </button>
       </div>
