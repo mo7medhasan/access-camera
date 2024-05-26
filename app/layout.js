@@ -1,3 +1,4 @@
+"use client"
 import { cookies, headers } from "next/headers";
 import "./globals.css";
 
