@@ -1,22 +1,15 @@
 "use client"
-import { cookies, headers } from "next/headers";
 import "./globals.css";
 
 import { Toaster } from "@/components/ui/toaster";
 
-// const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "UDO",
-  description: "  UDO",
-};
 
 export default function RootLayout({ children}) {
-  const theme = cookies().get("theme")
- 
+  
 
   return (
-    <html lang="en" className={theme?.value}>
+    <html lang="en" >
       <body className="
         bg-[#f7f1fb]
         text-black
